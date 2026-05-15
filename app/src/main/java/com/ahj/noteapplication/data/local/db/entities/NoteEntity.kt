@@ -1,4 +1,4 @@
-package com.ahj.noteapplication.data.local.db.entitys
+package com.ahj.noteapplication.data.local.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

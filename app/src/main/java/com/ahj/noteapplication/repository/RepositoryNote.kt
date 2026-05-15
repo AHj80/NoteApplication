@@ -2,7 +2,7 @@ package com.ahj.noteapplication.repository
 
 import android.util.Log
 import com.ahj.noteapplication.data.local.db.DAO.NoteDAO
-import com.ahj.noteapplication.data.local.db.entitys.NoteEntity
+import com.ahj.noteapplication.data.local.db.entities.NoteEntity
 import ir.amozeshgam.persiandate.PersianDate
 import javax.inject.Inject
 

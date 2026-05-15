@@ -5,7 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ahj.noteapplication.data.local.db.entitys.NoteEntity
+import com.ahj.noteapplication.data.local.db.entities.NoteEntity
 import kotlinx.coroutines.flow.Flow
 
 

@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ahj.noteapplication.data.local.db.entitys.NoteEntity
+import com.ahj.noteapplication.data.local.db.entities.NoteEntity
 import com.ahj.noteapplication.repository.RepositoryNote
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow

@@ -3,7 +3,7 @@ package com.ahj.noteapplication.data.local.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.ahj.noteapplication.data.local.db.DAO.NoteDAO
-import com.ahj.noteapplication.data.local.db.entitys.NoteEntity
+import com.ahj.noteapplication.data.local.db.entities.NoteEntity
 
 
 @Database(
