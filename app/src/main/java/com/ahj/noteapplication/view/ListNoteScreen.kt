@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -229,16 +230,15 @@ fun SampleNoteScreen(
             Spacer(Modifier.height(20.dp))
 
             Text(
-                if (noteEntity.body.length < 10)
-                    noteEntity.body
-                else
-                    "${noteEntity.body}...",
+                noteEntity.body,
                 color = Color.LightGray,
                 modifier = Modifier
                     .padding(10.dp)
                     .fillMaxWidth()
                     .height(40.dp),
                 textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
 
 
                 )
