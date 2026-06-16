@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -72,6 +74,7 @@ fun CreateNoteScreen(
 
     }
     Scaffold(
+        contentWindowInsets = WindowInsets.systemBars,
         topBar = {
 
             CenterAlignedTopAppBar(
@@ -127,9 +130,6 @@ fun CreateNoteScreen(
                     )
                 },
 
-                modifier = Modifier
-                    .height(40.dp)
-                    .padding(top = 7.dp, bottom = 7.dp),
                 colors = TopAppBarDefaults.topAppBarColors(Color.Transparent),
             )
 
