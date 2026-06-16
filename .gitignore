@@ -13,3 +13,16 @@
 .externalNativeBuild
 .cxx
 local.properties
+# امضای اپلیکیشن (بسیار مهم)
+*.jks
+*.keystore
+*.p12
+
+# فایل‌های کش اندروید استودیو
+.idea/
+/build
+.gradle/
+
+# فایل‌های حساس محلی
+local.properties
+

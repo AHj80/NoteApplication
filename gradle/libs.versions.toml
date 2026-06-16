@@ -8,7 +8,7 @@ espressoCore = "3.5.1"
 lifecycleRuntimeKtx = "2.6.1"
 activityCompose = "1.8.0"
 composeBom = "2024.09.00"
-coreKtxVersion = "1.17.0"
+lottieCompose = "6.6.7"
 roomVer = "2.7.1"
 daggerver = "2.57.1"
 navigationVer = "2.9.6"
@@ -29,10 +29,9 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtxVersion" }
-room-runtime = { group = "androidx.room" , name = "room-runtime" , version.ref = "roomVer" }
-room-ktx = { group = "androidx.room" , name = "room-ktx" , version.ref = "roomVer" }
-room-compiler = { group = "androidx.room" , name = "room-compiler" , version.ref = "roomVer" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomVer" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomVer" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVer" }
 lifecycle-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version = "2.10.0" }
 daggerhillt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "daggerver" }
 daggerhillt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "daggerver" }
@@ -41,13 +40,16 @@ gson = { group = "com.google.code.gson", name = "gson", version = "2.13.2" }
 coroutine-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.10.2" }
 coroutine-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version = "1.10.2" }
 converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version = "3.0.0" }
-hillt-navigation-compose = {group = "androidx.hilt" , name = "hilt-navigation-compose" , version="1.2.0"}
-navigation-compose = {group = "androidx.navigation" , name = "navigation-compose" , version.ref = "navigationVer"}
-datastore = {group = "androidx.datastore" , name = "datastore-preferences" , version = "1.1.7"}
+hillt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version = "1.2.0" }
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationVer" }
+datastore = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.7" }
+kotlin-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.7.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version = "2.0.21-1.0.27" }
-dagger = {id = "com.google.dagger.hilt.android" , version.ref = "daggerver"}
+dagger = { id = "com.google.dagger.hilt.android", version.ref = "daggerver" }
+
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
