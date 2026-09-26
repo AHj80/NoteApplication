@@ -1,0 +1,156 @@
+package com.ahj.noteapplication.feature.authentication.presentations.auth
+
+import android.util.Patterns
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.ahj.noteapplication.feature.authentication.domain.model.LoginModel
+import com.ahj.noteapplication.feature.authentication.domain.model.RegisterModel
+import com.ahj.noteapplication.feature.authentication.domain.useCase.LoginUseCase
+import com.ahj.noteapplication.feature.authentication.domain.useCase.RegisterUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.net.PasswordAuthentication
+import javax.inject.Inject
+
+
+@HiltViewModel
+class AuthenticationViewModel @Inject constructor(
+    private val loginUseCase: LoginUseCase,
+    private val registerUseCase: RegisterUseCase,
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(AuthenticationUiState())
+    val uiState: StateFlow<AuthenticationUiState> = _uiState.asStateFlow()
+
+    fun onEvent(event: AuthenticationUiEvent) {
+        when (event) {
+
+            is AuthenticationUiEvent.ChangeAuthentication -> {
+                _uiState.update { it.copy(changingAuth = event.auth) }
+            }
+
+            is AuthenticationUiEvent.ChangeEmail -> {
+                _uiState.update { it.copy(stateEmail = event.email) }
+
+            }
+
+            is AuthenticationUiEvent.ChangePass -> {
+                _uiState.update { it.copy(statePass = event.pass) }
+            }
+
+            is AuthenticationUiEvent.ChangePassConfirm -> {
+                _uiState.update { it.copy(statePassConfirm = event.passConfirm) }
+            }
+
+            is AuthenticationUiEvent.Transform -> {
+                _uiState.update { it.copy(visualTransform = !it.visualTransform) }
+            }
+
+            is AuthenticationUiEvent.OnDismiss -> {
+                _uiState.update { it.copy(status = AuthenticationStatus.IDELE) }
+            }
+
+            is AuthenticationUiEvent.Login -> {
+                login()
+            }
+
+            is AuthenticationUiEvent.Register -> {
+                register()
+            }
+
+            else -> {}
+
+        }
+    }
+
+    private fun login() {
+
+        val loginModel =
+            LoginModel(email = _uiState.value.stateEmail, password = _uiState.value.statePass)
+        viewModelScope.launch {
+            _uiState.update { it.copy(status = AuthenticationStatus.LOADING, error = null) }
+            loginUseCase(loginModel)
+                .onSuccess {
+                    _uiState.update {
+                        it.copy(
+                            status = AuthenticationStatus.SUCCESS,
+                            error = null
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            status = AuthenticationStatus.ERROR,
+                            error = error.message
+                        )
+                    }
+
+                }
+        }
+
+    }
+
+    private fun register() {
+        val registerModel =
+            RegisterModel(email = _uiState.value.stateEmail, password = _uiState.value.statePass)
+        viewModelScope.launch {
+            _uiState.update { it.copy(status = AuthenticationStatus.LOADING, message = null) }
+            registerUseCase(registerModel)
+                .onSuccess {
+                    _uiState.update {
+                        it.copy(
+                            status = AuthenticationStatus.SUCCESS,
+                            error = null
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            status = AuthenticationStatus.ERROR,
+                            error = error.message
+                        )
+                    }
+
+                }
+        }
+
+    }
+
+    fun validatingLogin(): Boolean {
+        val inputEmail = _uiState.value.stateEmail
+        val inputPass = _uiState.value.statePass
+
+        val email =
+            inputEmail.length > 9 && inputEmail.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(
+                inputEmail
+            ).matches()
+        val pass =
+            inputPass.length >= 8 && inputPass.isNotBlank() && inputPass.any { it.isUpperCase() }
+        return email && pass
+    }
+
+
+    fun validatingRegister(): Boolean {
+        val inputEmail = _uiState.value.stateEmail
+        val inputPass = _uiState.value.statePass
+        val inputPassConfirm = _uiState.value.statePassConfirm
+        val email =
+            Patterns.EMAIL_ADDRESS.matcher(inputEmail).matches() && inputEmail.isNotBlank()
+        val passMatch =
+            inputPass == inputPassConfirm
+                    && inputPass.isNotBlank()
+                    && inputPassConfirm.isNotBlank()
+                    && inputPass.length >= 8
+                    && inputPass.any { it.isUpperCase() }
+
+        return email && passMatch
+    }
+
+
+}

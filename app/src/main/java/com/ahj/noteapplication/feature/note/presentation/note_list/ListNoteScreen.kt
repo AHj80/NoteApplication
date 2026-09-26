@@ -59,13 +59,13 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.ahj.noteapplication.app.navigation.Screens
 import com.ahj.noteapplication.core.common.ui.component.CreateResultScreen
 import com.ahj.noteapplication.core.common.ui.component.CreateTextField
 import com.ahj.noteapplication.feature.note.domain.model.Note
-import com.ahj.noteapplication.app.navigation.Screens
 
 
 @OptIn(ExperimentalMaterial3Api::class)
