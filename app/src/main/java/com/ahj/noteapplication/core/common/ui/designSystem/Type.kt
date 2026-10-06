@@ -17,8 +17,7 @@ val vazirmatn = FontFamily(
 )
 
 
-// Set of Material typography styles to start with
-val typography = Typography(
+val customTypography = Typography(
     labelMedium = TextStyle(
         fontFamily = vazirmatn,
         fontWeight = FontWeight.Normal,
@@ -33,10 +32,7 @@ val typography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 1.sp,
-        textDirection = TextDirection.Rtl,
-
-
-
+        textDirection = TextDirection.Rtl
     ),
     titleLarge = TextStyle(
         fontFamily = vazirmatn,

@@ -39,7 +39,7 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3"  }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 
 #supabase
 auth-kt = { module = "io.github.jan-tennert.supabase:auth-kt" }
@@ -94,8 +94,15 @@ coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version = "3
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version = "3.6.2" }
 
 # Foundation
-foundation = {group = "androidx.compose.foundation" , name = "foundation" , version = "1.12.1"}
+foundation = { group = "androidx.compose.foundation", name = "foundation", version = "1.12.1" }
 tink-android = { module = "com.google.crypto.tink:tink-android", version.ref = "tinkAndroid" }
+
+#MockServer-Test
+mock-server = { group = "com.squareup.okhttp3", name = "mockwebserver", version = "4.12.0" }
+
+#Rich Text Editor
+richtexteditor = { group = "com.mohamedrejeb.richeditor", name = "richeditor-compose" , version = "1.2.1"}
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -20,6 +20,6 @@ sealed class Screens {
     object ListNoteScreens : Screens()
 
     @Serializable
-    data class CreateScreen(val id: Int) : Screens()
+    data class CreateScreen(val id: String?) : Screens()
 
 }

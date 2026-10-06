@@ -1,5 +1,7 @@
 package com.ahj.noteapplication.feature.authentication.presentations.auth
 
+import androidx.navigation.NavController
+
 
 sealed interface AuthenticationUiEvent {
 
@@ -13,6 +15,7 @@ sealed interface AuthenticationUiEvent {
     object Register : AuthenticationUiEvent
     object Transform : AuthenticationUiEvent
     object ForgetPass : AuthenticationUiEvent
+
 
 
 }

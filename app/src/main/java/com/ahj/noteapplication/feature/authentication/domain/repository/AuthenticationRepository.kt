@@ -16,9 +16,8 @@ interface AuthenticationRepository {
 
     suspend fun resendOtp(email: String): Result<Boolean>
 
-    suspend fun sendResetPassOtp(email: String): Result<Boolean>
+    suspend fun sendResetPassOtp(emailAddress: String): Result<Boolean>
 
     suspend fun verifyResetPassOtp(requestModel : VerifyOtpModel): Result<UserModel>
 
-    suspend fun getSession(): Boolean
 }

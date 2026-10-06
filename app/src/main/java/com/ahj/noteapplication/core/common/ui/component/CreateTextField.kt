@@ -1,78 +1,215 @@
 package com.ahj.noteapplication.core.common.ui.component
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.KeyboardActionHandler
+import androidx.compose.foundation.text.input.OutputTransformation
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mohamedrejeb.richeditor.model.RichTextState
+import com.mohamedrejeb.richeditor.ui.BasicRichTextEditor
 
 @Composable
 fun CreateTextField(
-    stateText: String,
-    stateTextChanged: (String) -> Unit,
+    state: TextFieldState,
+    placeholder: String,
     modifier: Modifier = Modifier,
-    placeholder: String = "",
+    isError: Boolean = false,
+    isPasswordVisible: Boolean = true, // اگر false باشد، متن مخفی (Password) می‌شود
     singleLine: Boolean = true,
-    leadingIcon: ImageVector? = null,
-    fontSize: Int = 16,
-    material: TextStyle = MaterialTheme.typography.bodyLarge
+    readOnly: Boolean = false,
+    placeholderSize: Int = 16,
+    enabled: Boolean = true,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    onKeyboardAction: KeyboardActionHandler? = null,
+    inputTransformation: InputTransformation? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    shape: Shape = RoundedCornerShape(20.dp),
+    textAlign: TextAlign = TextAlign.Start,
+    paddingValue: PaddingValues = PaddingValues(),
+    textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+    containerColor: Color = if (readOnly) Color.LightGray else MaterialTheme.colorScheme.secondary.copy(
+        alpha = 0.5f
+    ),
+    colors: TextFieldColors = TextFieldDefaults.colors(
+        focusedContainerColor = containerColor,
+        unfocusedContainerColor = containerColor,
+        disabledContainerColor = containerColor,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+        disabledIndicatorColor = Color.Transparent,
+        errorIndicatorColor = Color.Red,
+        errorContainerColor = Color.White,
+        cursorColor = MaterialTheme.colorScheme.primary,
+        focusedTextColor = MaterialTheme.colorScheme.primary,
+        unfocusedTextColor = MaterialTheme.colorScheme.primary,
+    ),
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
 
-    TextField(
-        value = stateText,
-        onValueChange = stateTextChanged,
-        modifier = modifier.size(width = 270.dp, height = 60.dp),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.primary,
-            unfocusedContainerColor = MaterialTheme.colorScheme.primary,
-            errorContainerColor = MaterialTheme.colorScheme.primary,
-            disabledContainerColor = MaterialTheme.colorScheme.primary,
-            errorIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent,
-            focusedIndicatorColor = MaterialTheme.colorScheme.tertiary,
-            cursorColor = MaterialTheme.colorScheme.secondary,
-            selectionColors = TextSelectionColors(
-                MaterialTheme.colorScheme.secondary,
-                MaterialTheme.colorScheme.secondary
-            ),
-            focusedTextColor = MaterialTheme.colorScheme.tertiary
-        ),
-        shape = RoundedCornerShape(5.dp),
-        textStyle = material.copy(
-            fontSize = fontSize.sp
-        ),
-        placeholder = {
-            Text(
-                placeholder,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.fillMaxWidth(),
-                color = Color.Gray
-            )
-        },
-        singleLine = singleLine,
-        leadingIcon = leadingIcon?.let {
-            {
-                Icon(
-                    imageVector = it,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.scale(1.5f)
-                )
-            }
-        }
+    // برای شخصی سازی استایل ها
+    val mergeStyle = LocalTextStyle.current.merge(textStyle)
 
+    val lineLimits = if (singleLine) TextFieldLineLimits.SingleLine else TextFieldLineLimits.Default
+
+    // ماسک کردن متن رمز عبور با الگوی جدید OutputTransformation
+    val outputTransformation = if (!isPasswordVisible) {
+        OutputTransformation {
+            replace(0, length, "•".repeat(length))
+        }
+    } else {
+        null
+    }
+
+    BasicTextField(
+        state = state,
+        modifier = modifier
+            .padding(paddingValue),
+        enabled = enabled,
+        readOnly = readOnly,
+        textStyle = mergeStyle,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        onKeyboardAction = onKeyboardAction,
+        lineLimits = lineLimits,
+        inputTransformation = inputTransformation,
+        outputTransformation = outputTransformation,
+        interactionSource = interactionSource,
+        decorator = { innerTextField ->
+            TextFieldDefaults.DecorationBox(
+                value = state.text.toString(),
+                innerTextField = innerTextField,
+                enabled = enabled,
+                singleLine = singleLine,
+                visualTransformation = VisualTransformation.None,
+                interactionSource = interactionSource,
+                isError = isError,
+                placeholder = {
+                    Text(
+                        text = placeholder,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontSize = placeholderSize.sp,
+                        textAlign = textAlign,
+                        color = Color.Gray
+                    )
+                },
+                leadingIcon = leadingIcon,
+                trailingIcon = trailingIcon,
+                shape = shape,
+                colors = colors,
+                contentPadding = PaddingValues(
+                    start = 15.dp,
+                    end = 15.dp,
+                    top = 12.dp,
+                    bottom = 12.dp
+                )
+            )
+        }
+    )
+}
+
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CreateRichTextField(
+    state: RichTextState,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    isError: Boolean = false,
+    singleLine: Boolean = false, // برای ادیتور RichText معمولاً چندخطی مناسب‌تر است
+    readOnly: Boolean = false,
+    placeholderSize: Int = 16,
+    enabled: Boolean = true,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    shape: Shape = RoundedCornerShape(20.dp),
+    textAlign: TextAlign = TextAlign.Start,
+    paddingValue: PaddingValues = PaddingValues(),
+    textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+    containerColor: Color = if (readOnly) Color.LightGray else MaterialTheme.colorScheme.secondary.copy(
+        alpha = 0.5f
+    ),
+    colors: TextFieldColors = TextFieldDefaults.colors(
+        focusedContainerColor = containerColor,
+        unfocusedContainerColor = containerColor,
+        disabledContainerColor = containerColor,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+        disabledIndicatorColor = Color.Transparent,
+        errorIndicatorColor = Color.Red,
+        errorContainerColor = Color.White,
+        cursorColor = MaterialTheme.colorScheme.primary,
+        focusedTextColor = MaterialTheme.colorScheme.primary,
+        unfocusedTextColor = MaterialTheme.colorScheme.primary,
+    ),
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
+) {
+    val mergeStyle = LocalTextStyle.current.merge(textStyle)
+
+    BasicRichTextEditor(
+        state = state,
+        modifier = modifier.padding(paddingValue),
+        enabled = enabled,
+        readOnly = readOnly,
+        textStyle = mergeStyle,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        singleLine = singleLine,
+        interactionSource = interactionSource,
+        decorationBox = { innerTextField ->
+            TextFieldDefaults.DecorationBox(
+                value = state.toText(), // مقدار متنی ساده جهت تشخیص خالی بودن برای Placeholder
+                innerTextField = innerTextField,
+                enabled = enabled,
+                singleLine = singleLine,
+                visualTransformation = VisualTransformation.None,
+                interactionSource = interactionSource,
+                isError = isError,
+                placeholder = {
+                    if (state.annotatedString.text.isBlank()) {
+                        Text(
+                            text = placeholder,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontSize = placeholderSize.sp,
+                            textAlign = textAlign,
+                            color = Color.Gray
+                        )
+                    }
+                },
+                leadingIcon = leadingIcon,
+                trailingIcon = trailingIcon,
+                shape = shape,
+                colors = colors,
+                contentPadding = PaddingValues(
+                    start = 15.dp,
+                    end = 15.dp,
+                    top = 12.dp,
+                    bottom = 12.dp
+                )
+            )
+        }
     )
 }

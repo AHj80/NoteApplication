@@ -4,7 +4,11 @@ enum class ForgetPassStatus {
 
     IDELE,
     LOADING,
-    SUCCESS,
-    ERROR
+    // EMAIL SENDING OTP
+    EMAIL_SUCCESS,
+    EMAIL_ERROR,
+    // VERIFY OTP
+    VERIFY_SUCCESS,
+    VERIFY_ERROR,
 
 }

@@ -1,6 +1,6 @@
 package com.ahj.noteapplication.feature.authentication.data.repository
 
-import com.ahj.noteapplication.core.common.utils.ApiHelper
+import com.ahj.noteapplication.core.common.utils.SafeHelper
 import com.ahj.noteapplication.feature.authentication.data.mapper.toDomain
 import com.ahj.noteapplication.feature.authentication.domain.model.LoginModel
 import com.ahj.noteapplication.feature.authentication.domain.model.RegisterModel
@@ -10,20 +10,19 @@ import com.ahj.noteapplication.feature.authentication.domain.repository.Authenti
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.OtpType
 import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.auth.providers.builtin.OTP
 import io.github.jan.supabase.auth.user.UserInfo
-import kotlinx.coroutines.delay
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 
 
 class AuthenticationRepositoryImpl @Inject constructor(
     private val supabaseAuth: Auth,
-    private val apiHelper: ApiHelper
+    private val safeHelper: SafeHelper
 
 ) : AuthenticationRepository {
 
     override suspend fun login(requestModel: LoginModel): Result<UserModel> =
-        apiHelper.authenticationHandler {
+        safeHelper.authenticationHandler {
             supabaseAuth.signInWith(Email) {
                 this.email = requestModel.email
                 this.password = requestModel.password
@@ -34,7 +33,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
 
     override suspend fun register(requestModel: RegisterModel): Result<Boolean> =
 
-        apiHelper.authenticationHandler {
+        safeHelper.authenticationHandler {
             supabaseAuth.signUpWith(Email) {
                 this.email = requestModel.email
                 this.password = requestModel.password
@@ -44,7 +43,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
 
 
     override suspend fun otpVerify(requestModel: VerifyOtpModel): Result<UserModel> =
-        apiHelper.authenticationHandler {
+        safeHelper.authenticationHandler {
             supabaseAuth.verifyEmailOtp(
                 type = OtpType.Email.SIGNUP,
                 email = requestModel.email,
@@ -55,7 +54,7 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
 
     override suspend fun resendOtp(email: String): Result<Boolean> =
-        apiHelper.authenticationHandler {
+        safeHelper.authenticationHandler {
             supabaseAuth.resendEmail(
                 OtpType.Email.SIGNUP,
                 email = email
@@ -63,16 +62,16 @@ class AuthenticationRepositoryImpl @Inject constructor(
             true
         }
 
-    override suspend fun sendResetPassOtp(email: String): Result<Boolean> =
-        apiHelper.authenticationHandler {
-            supabaseAuth.resetPasswordForEmail(
-                email = email
-            )
+    override suspend fun sendResetPassOtp(emailAddress: String): Result<Boolean> =
+        safeHelper.authenticationHandler {
+            supabaseAuth.signInWith(OTP){
+                email= emailAddress
+            }
             true
         }
 
     override suspend fun verifyResetPassOtp(requestModel: VerifyOtpModel): Result<UserModel> =
-        apiHelper.authenticationHandler {
+        safeHelper.authenticationHandler {
             supabaseAuth.verifyEmailOtp(
                 OtpType.Email.RECOVERY,
                 token = requestModel.otp,
@@ -81,16 +80,6 @@ class AuthenticationRepositoryImpl @Inject constructor(
             checkUserData(supabaseAuth.currentUserOrNull())
         }
 
-    override suspend fun getSession(): Boolean {
-
-        return try {
-            supabaseAuth.awaitInitialization()
-            val session = supabaseAuth.currentSessionOrNull()
-            session != null
-        } catch (e: Exception) {
-            false
-        }
-    }
 
 
     private fun checkUserData(user: UserInfo?): UserModel {

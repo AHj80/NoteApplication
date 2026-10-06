@@ -65,12 +65,27 @@ fun AuthenticationScreen(
     val onEvent = viewModel::onEvent
 
     LaunchedEffect(uiState.status) {
-        if (uiState.status == AuthenticationStatus.SUCCESS) {
-            navController.navigate(Screens.VerificationScreen(uiState.stateEmail)) {
-                popUpTo<Screens.Authentication> {
-                    inclusive = true
-                }
+        when(uiState.status){
+            AuthenticationStatus.SUCCESS_REGISTER ->{
+
+                    navController.navigate(Screens.VerificationScreen(uiState.stateEmail)) {
+                        popUpTo<Screens.Authentication> {
+                            inclusive = true
+                        }
+                    }
+
             }
+
+            AuthenticationStatus.SUCCESS_LOGIN ->{
+
+                navController.navigate(Screens.ListNoteScreens) {
+                    popUpTo<Screens.Authentication> {
+                        inclusive = true
+                    }
+                }
+
+            }
+            else -> {}
         }
     }
 
@@ -105,7 +120,13 @@ fun AuthenticationScreen(
                         uiState.statePass,
                         uiState.visualTransform,
                         viewModel.validatingLogin(),
-                        { onEvent(it) }
+                        { event ->
+                            if (event is AuthenticationUiEvent.ForgetPass) {
+                                navController.navigate(Screens.ForgetPassword) {
+                                    popUpTo<Screens.ForgetPassword> { inclusive = true }
+                                }
+                            } else viewModel.onEvent(event)
+                        }
                     )
                 } else {
                     Register(
@@ -121,7 +142,6 @@ fun AuthenticationScreen(
                 }
             }
 
-            ForgetPassword { navController.navigate(Screens.ForgetPassword) }
 
         }
 
@@ -213,7 +233,22 @@ private fun Register(
                 },
                 "رمز خود تکرار نمایید",
                 keyboardType = KeyboardType.Password,
-                visualTransformation = visualTransform
+                visualTransformation = visualTransform,
+                leadingIcon = {
+                    IconButton({ onEvent(AuthenticationUiEvent.Transform) }) {
+                        if (visualTransform) {
+                            Icon(
+                                Icons.Default.Visibility,
+                                contentDescription = null,
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.VisibilityOff,
+                                contentDescription = null,
+                            )
+                        }
+                    }
+                }
             )
             SpacerHeight(30)
 
@@ -287,7 +322,17 @@ private fun Login(
                     }
                 }
             )
-            SpacerHeight(20)
+
+
+            TextButton({
+                onEvent(AuthenticationUiEvent.ForgetPass)
+            }) {
+                Text(
+                    "فراموشی رمز عبور",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
 
             InsertAuthButton("ورود", enabled = enabled) {
                 onEvent(AuthenticationUiEvent.Login)
@@ -380,15 +425,4 @@ private fun BottomBar(
 }
 
 
-@Composable
-fun ForgetPassword(onEvent: (AuthenticationUiEvent) -> Unit) {
-    TextButton({
-        onEvent(AuthenticationUiEvent.ForgetPass)
-    }) {
-        Text(
-            "فراموشی رمز عبور",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.primary
-        )
-    }
-}
+

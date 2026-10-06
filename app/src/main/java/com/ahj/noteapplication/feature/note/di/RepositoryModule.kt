@@ -1,6 +1,6 @@
 package com.ahj.noteapplication.feature.note.di
 
-import com.ahj.noteapplication.feature.note.data.repository.RepositoryImpl
+import com.ahj.noteapplication.feature.note.data.repository.NoteRepositoryImpl
 import com.ahj.noteapplication.feature.note.domain.repository.RepositoryNote
 import dagger.Binds
 import dagger.Module
@@ -15,5 +15,5 @@ abstract class RepositoryModule {
 
 
     @Binds
-    abstract fun provideRepositoryImpl(repositoryImpl: RepositoryImpl): RepositoryNote
+    abstract fun provideRepositoryImpl(noteRepositoryImpl: NoteRepositoryImpl): RepositoryNote
 }

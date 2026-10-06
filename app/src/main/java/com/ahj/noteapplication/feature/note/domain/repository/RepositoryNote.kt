@@ -5,23 +5,20 @@ import kotlinx.coroutines.flow.Flow
 
 interface RepositoryNote {
 
-    suspend fun addNote(note: Note): Result<Long>
+    suspend fun addNote(note: Note): Result<Unit>
 
     fun getNoteData(): Flow<List<Note>>
 
-    suspend fun getNoteById(id: Int) : Note?
+    suspend fun getNoteById(id: String) : Note?
 
     suspend fun deleteNote(note: Note): Boolean
 
     suspend fun updateData(
-        id: Int,
-        title: String,
-        body: String,
-        fontSize: Int,
-        date: String
-    ): Boolean
+        note: Note
+    ): Result<Unit>
 
-    fun showDate(): String
+
+    suspend fun syncNoteData(note: List<Note>): Result<Unit>
 
 
 }

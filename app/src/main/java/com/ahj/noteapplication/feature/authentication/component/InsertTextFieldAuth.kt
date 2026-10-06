@@ -60,7 +60,7 @@ fun InsertTextFieldAuth(
     )
 
     BasicTextField(
-        value = value,
+        value = value.trim(),
         onValueChange = onValueChange,
         modifier = modifier
             .fillMaxWidth()

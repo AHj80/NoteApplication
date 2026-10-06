@@ -10,20 +10,21 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
 import com.ahj.noteapplication.core.common.ui.component.BackgroundScreen
 import com.ahj.noteapplication.feature.authentication.presentations.auth.AuthenticationScreen
+import com.ahj.noteapplication.feature.authentication.presentations.forgetPass.ForgetPassScreen
 import com.ahj.noteapplication.feature.authentication.presentations.splash.SplashScreen
 import com.ahj.noteapplication.feature.authentication.presentations.verification.VerificationScreen
-import com.ahj.noteapplication.feature.note.presentation.note_creation.CreateNoteScreen
-import com.ahj.noteapplication.feature.note.presentation.note_list.ListNoteScreen
+import com.ahj.noteapplication.feature.note.presentation.createNote.CreateNoteScreen
+import com.ahj.noteapplication.feature.note.presentation.noteList.ListNoteScreen
 
 @Composable
 fun SetUi() {
 
     val navController = rememberNavController()
 
-    Scaffold { innerPadding ->
+    Scaffold(
+    ) { innerPadding ->
 
 
         NavHost(
@@ -42,7 +43,9 @@ fun SetUi() {
             }
 
             composable<Screens.ForgetPassword> {
-
+                BackgroundScreen(paddingValues = innerPadding) {
+                    ForgetPassScreen(navController)
+                }
             }
 
             composable<Screens.VerificationScreen> {
@@ -53,7 +56,6 @@ fun SetUi() {
 
             composable<Screens.ListNoteScreens> {
                 BackgroundScreen(paddingValues = innerPadding) {
-
 
                     ListNoteScreen(navController)
 
@@ -76,10 +78,9 @@ fun SetUi() {
                 }
             ) {
 
-                val data = it.toRoute<Screens.CreateScreen>()
-                BackgroundScreen(paddingValues = innerPadding) {
-                    CreateNoteScreen(navController, id = data.id)
 
+                BackgroundScreen(paddingValues = innerPadding) {
+                    CreateNoteScreen(navController)
                 }
             }
         }

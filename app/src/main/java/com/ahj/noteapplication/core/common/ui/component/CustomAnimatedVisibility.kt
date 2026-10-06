@@ -5,15 +5,15 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 
 @Composable
 fun CustomAnimateVisibility(
     state: Boolean,
+    modifier: Modifier = Modifier,
     enter: Int = 600,
     exit: Int = 600,
     content: @Composable AnimatedVisibilityScope.(Transition<EnterExitState>) -> Unit
@@ -21,6 +21,7 @@ fun CustomAnimateVisibility(
 
     AnimatedVisibility(
         visible = state,
+        modifier = modifier,
         enter = fadeIn(tween(enter)),
         exit = fadeOut(animationSpec = tween(exit)),
     ) {

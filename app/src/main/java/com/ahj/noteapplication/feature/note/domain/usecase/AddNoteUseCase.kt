@@ -2,19 +2,34 @@ package com.ahj.noteapplication.feature.note.domain.usecase
 
 import com.ahj.noteapplication.feature.note.domain.model.Note
 import com.ahj.noteapplication.feature.note.domain.repository.RepositoryNote
+import java.util.UUID
 import javax.inject.Inject
 
 class AddNoteUseCase @Inject constructor(
     private val repositoryNote: RepositoryNote
 ) {
 
-    suspend operator fun invoke(note: Note): Result<Long>{
+    suspend operator fun invoke(
+        title: String,
+        body: String,
+        date: String,
+        fontSize: Int
+        ): Result<Unit> {
 
 
-        return if (note.title.isEmpty())
+
+        return if (title.isEmpty())
             Result.failure(IllegalArgumentException("Data is Empty"))
         else
-            repositoryNote.addNote(note)
+            repositoryNote.addNote(
+                Note(
+                    id = UUID.randomUUID().toString(),
+                    title =title,
+                    body = body,
+                    date = date,
+                    fontSize = fontSize
+                )
+            )
     }
 
 }

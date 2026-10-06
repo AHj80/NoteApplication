@@ -49,7 +49,7 @@ fun NoteApplicationTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = typography,
+        typography = customTypography,
         content = {
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                 content()

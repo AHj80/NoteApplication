@@ -28,7 +28,7 @@ fun BackgroundScreen(
                 R.drawable.light_background
             ),
             contentDescription = null,
-            contentScale = ContentScale.FillBounds,
+            contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
         Box(

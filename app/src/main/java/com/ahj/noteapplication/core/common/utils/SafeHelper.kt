@@ -9,21 +9,22 @@ import java.net.SocketTimeoutException
 import javax.inject.Inject
 
 
-class ApiHelper @Inject constructor() {
+class SafeHelper @Inject constructor() {
 
 
-    suspend fun <T> safeData(request: suspend () -> Response<T>): Result<T> {
+    suspend fun <T> safeNetwork(request: suspend () -> Response<T>): Result<T> {
         return try {
             val response = request()
             if (response.isSuccessful) {
                 val body = response.body()
-                if (body != null){
+                if (body != null) {
                     Result.success(body)
-                } else{
-                    Result.failure(Exception("پاسخ بدون محتوا میباشد...!"))
+                } else {
+                    @Suppress("UNCHECKED_CAST")
+                    Result.success(Unit as T)
                 }
             } else {
-                Result.failure(Exception("${response.code()}"))
+                Result.failure(Exception("خطای سرور: ${response.errorBody()?.string()}"))
             }
         } catch (e: Exception) {
             val customException = when (e) {
@@ -58,9 +59,19 @@ class ApiHelper @Inject constructor() {
                         else -> Exception("خطا از سمت سرور: ${e.error}")
                     }
                 }
+
                 else -> Exception(e.localizedMessage ?: "خطای ناشناخته رخ داده است.")
             }
             Result.failure(customException)
+        }
+    }
+
+    suspend fun <T> safeDatabase(request: suspend () -> T): Result<T> {
+        return try {
+            val result = request()
+            Result.success(result)
+        } catch (e: Exception) {
+            Result.failure(Exception("خطای داخلی $e"))
         }
     }
 }

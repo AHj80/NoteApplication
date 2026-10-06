@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.ahj.noteapplication.core.database.MyDatabase
 import com.ahj.noteapplication.core.database.migration.MIGRATION_1_2
-import com.ahj.noteapplication.feature.note.data.local.DAO.NoteDAO
+import com.ahj.noteapplication.feature.note.data.local.db.DAO.NoteDAO
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

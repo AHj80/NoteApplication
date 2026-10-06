@@ -6,6 +6,11 @@ import javax.inject.Inject
 
 class PersianDate @Inject constructor() {
 
+
+    init {
+        fromTimestamp(System.currentTimeMillis())
+    }
+
     var strWeekDay = ""
     var strMonth = ""
     var day = 0

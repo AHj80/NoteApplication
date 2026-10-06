@@ -124,5 +124,10 @@ dependencies {
     implementation(platform(libs.bom))
     implementation(libs.auth.kt)
 
+    // MockServer-Test
+    implementation(libs.mock.server)
+
+    // TextRichEditor
+    implementation(libs.richtexteditor)
 
 }

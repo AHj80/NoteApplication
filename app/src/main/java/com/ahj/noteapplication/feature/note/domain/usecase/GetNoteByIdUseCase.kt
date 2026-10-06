@@ -8,6 +8,6 @@ class GetNoteByIdUseCase @Inject constructor(
      private val repositoryNote: RepositoryNote
 ) {
 
-    suspend operator fun invoke(id: Int) = repositoryNote.getNoteById(id)
+    suspend operator fun invoke(id: String) = repositoryNote.getNoteById(id)
 
 }

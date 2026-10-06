@@ -5,7 +5,8 @@ package com.ahj.noteapplication.feature.authentication.presentations.auth
 enum class AuthenticationStatus {
 
     IDELE,
-    SUCCESS,
+    SUCCESS_LOGIN,
+    SUCCESS_REGISTER,
     ERROR,
     LOADING
 }

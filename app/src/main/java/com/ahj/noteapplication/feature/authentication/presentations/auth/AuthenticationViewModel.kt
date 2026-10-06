@@ -77,7 +77,7 @@ class AuthenticationViewModel @Inject constructor(
                 .onSuccess {
                     _uiState.update {
                         it.copy(
-                            status = AuthenticationStatus.SUCCESS,
+                            status = AuthenticationStatus.SUCCESS_LOGIN,
                             error = null
                         )
                     }
@@ -104,7 +104,7 @@ class AuthenticationViewModel @Inject constructor(
                 .onSuccess {
                     _uiState.update {
                         it.copy(
-                            status = AuthenticationStatus.SUCCESS,
+                            status = AuthenticationStatus.SUCCESS_REGISTER,
                             error = null
                         )
                     }

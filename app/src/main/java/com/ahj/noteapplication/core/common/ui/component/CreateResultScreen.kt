@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 
 
 @Composable
-fun CreateResultScreen(text: String) {
+fun CreateResultScreen(text: String?) {
 
 
     Box(
@@ -26,11 +26,14 @@ fun CreateResultScreen(text: String) {
         contentAlignment = Alignment.Center
     ) {
 
-        Text(
-            text,
-            style = MaterialTheme.typography.titleLarge,
-            color = Color.White
-        )
+
+        text?.let {
+            Text(
+                text,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
 
     }
 
