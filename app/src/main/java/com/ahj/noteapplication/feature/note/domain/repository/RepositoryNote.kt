@@ -17,6 +17,7 @@ interface RepositoryNote {
         note: Note
     ): Result<Unit>
 
+    suspend fun unsyncedData()
 
     suspend fun syncNoteData(note: List<Note>): Result<Unit>
 

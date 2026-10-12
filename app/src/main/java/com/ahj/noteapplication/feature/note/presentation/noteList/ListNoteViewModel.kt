@@ -43,13 +43,19 @@ class ListNoteViewModel @Inject constructor(
             is ListNoteUiEvent.OnDismissHoldingClick -> {
                 _uiState.update {
                     it.copy(
-                        selectedNote = ""
+                        selectedNote = null
                     )
                 }
             }
 
 
-            is ListNoteUiEvent.DeleteNote -> deleteNote(event.note)
+            is ListNoteUiEvent.DeleteNote -> {
+                deleteNote(event.note)
+            }
+
+            is ListNoteUiEvent.CloseDialog -> {
+                _uiState.update { it.copy(stateDialog = false) }
+            }
 
             else -> {}
         }
@@ -58,13 +64,14 @@ class ListNoteViewModel @Inject constructor(
 
 
     private fun getNoteData() {
-
         viewModelScope.launch {
+            _uiState.update { it.copy(status = ListScreenStatus.LOADING , statusMessage = null) }
             getNoteDataUseCase()
                 .catch { e ->
                     _uiState.update {
                         it.copy(
-                            message = e.message
+                            statusMessage = e.message,
+                            status = ListScreenStatus.ERROR
                         )
                     }
                 }
@@ -72,15 +79,20 @@ class ListNoteViewModel @Inject constructor(
 
                     if (list.isEmpty()) {
                         _uiState.update {
-                            it.copy(note = list)
+                            it.copy(
+                                note = list,
+                                status = ListScreenStatus.EMPTY,
+                                statusMessage = "یادداشتی وجود ندارد."
+                            )
                         }
                     } else {
                         _uiState.update {
-                            it.copy(note = list)
+                            it.copy(note = list, statusMessage = null)
                         }
                     }
 
                 }.launchIn(viewModelScope)
+
 
         }
     }
@@ -88,9 +100,9 @@ class ListNoteViewModel @Inject constructor(
 
     private fun deleteNote(note: Note) {
         viewModelScope.launch {
-            deleteNoteUseCase(note)
-
-            _uiState.update { it.copy(message = "با موفقیت حذف گردید") }
+            val delete = deleteNoteUseCase(note)
+            if (delete)
+                _uiState.update { it.copy(stateDialog = true, message = "با موفقیت حذف گردید") }
         }
     }
 

@@ -15,3 +15,18 @@ fun Context.networkManager(): Boolean {
             capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 }
 
+fun String.stripMarkdown(): String {
+    return this
+        // پاک کردن تگ‌های HTML مثل <u>, </u>
+        .replace(Regex("<[^>]*>"), "")
+        // پاک کردن هدرها (# Header)
+        .replace(Regex("(?m)^#{1,6}\\s+"), "")
+        // پاک کردن علامت‌های بولد و ایتالیک (**bold**, *italic*, __bold__, _italic_)
+        .replace(Regex("(\\*\\*|\\*|__|_)"), "")
+        // پاک کردن لینک‌ها [text](url) -> text
+        .replace(Regex("\\[([^\\]]+)\\]\\([^\\)]+\\)"), "\$1")
+        // پاک کردن کدهای خطی
+        .replace(Regex("`{1,3}.*?`{1,3}"), "")
+        .trim()
+}
+

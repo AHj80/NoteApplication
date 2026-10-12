@@ -16,20 +16,30 @@ interface NoteDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertNote(noteEntity: NoteEntity)
 
-    @Query("SELECT * FROM NoteEntity")
+    @Query("SELECT * FROM NoteEntity WHERE isDelete = 0")
     fun getNoteData(): Flow<List<NoteEntity>>
 
     @Query("SELECT * FROM NoteEntity WHERE id = :id LIMIT 1")
     suspend fun getNoteDataById(id: String): NoteEntity?
 
 
-    @Delete
-    suspend fun deleteNote(note: NoteEntity)
+    @Query("UPDATE NoteEntity SET synced = 0 , isDelete = 1 WHERE id = :id")
+    suspend fun softDeleteNote(id: String)
+
+    @Query("DELETE FROM NoteEntity WHERE id = :id ")
+    suspend fun hardDeleteNote(id: String)
 
 
     @Query("UPDATE NoteEntity SET synced = :sync WHERE id = :id")
     suspend fun updateSyncData(sync: Boolean, id: String)
 
+
+    @Query("SELECT COUNT(*) FROM NoteEntity")
+    suspend fun getCountNote(): Int
+
     @Upsert
     suspend fun syncNote(noteEntity: List<NoteEntity>)
+
+    @Query("SELECT * FROM NoteEntity WHERE synced = 1")
+    suspend fun getNoteUnsynced(): List<NoteEntity>
 }

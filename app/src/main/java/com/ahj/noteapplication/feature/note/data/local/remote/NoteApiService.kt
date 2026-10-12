@@ -28,4 +28,10 @@ interface NoteApiService {
     suspend fun deleteNote(
         @Query("id") id: String
     ): Response<List<NoteDto>>
+
+    @POST("rest/v1/Notes")
+    suspend fun unsyncedData(
+        @Body unSynced: List<NoteDto>
+    ): Response<List<NoteDto>>
 }
+

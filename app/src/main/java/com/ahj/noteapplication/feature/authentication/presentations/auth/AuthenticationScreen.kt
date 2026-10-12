@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -174,7 +175,7 @@ private fun Register(
 ) {
 
 
-    GlassCard {
+    GlassCard(corner = RoundedCornerShape(20.dp)) {
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -272,7 +273,7 @@ private fun Login(
     onEvent: (AuthenticationUiEvent) -> Unit
 ) {
 
-    GlassCard {
+    GlassCard(corner = RoundedCornerShape(20.dp)) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center

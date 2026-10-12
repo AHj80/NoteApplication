@@ -1,4 +1,4 @@
-package com.ahj.noteapplication.feature.note.di
+package com.ahj.noteapplication.feature.note.data.di
 
 import com.ahj.noteapplication.feature.note.data.repository.NoteRepositoryImpl
 import com.ahj.noteapplication.feature.note.domain.repository.RepositoryNote

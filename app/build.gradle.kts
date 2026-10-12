@@ -130,4 +130,8 @@ dependencies {
     // TextRichEditor
     implementation(libs.richtexteditor)
 
+    //worker
+    implementation(libs.workmanager)
+    implementation(libs.hilt.work)
+
 }

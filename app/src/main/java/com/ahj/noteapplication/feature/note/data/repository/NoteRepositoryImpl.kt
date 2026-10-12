@@ -10,15 +10,18 @@ import com.ahj.noteapplication.feature.note.data.mapper.toDto
 import com.ahj.noteapplication.feature.note.data.mapper.toEntity
 import com.ahj.noteapplication.feature.note.domain.model.Note
 import com.ahj.noteapplication.feature.note.domain.repository.RepositoryNote
+import com.ahj.noteapplication.feature.note.worker.NoteWorkerScheduler
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 
 class NoteRepositoryImpl @Inject constructor(
     private val noteDAO: NoteDAO,
     private val api: NoteApiService,
     private val safeHelper: SafeHelper,
+    private val worker: NoteWorkerScheduler,
     private val sessionManager: SessionManager
 ) : RepositoryNote {
 
@@ -39,13 +42,12 @@ class NoteRepositoryImpl @Inject constructor(
             api.insertNote(note.toDto("7fdcf63c-a148-4e95-87b0-197fc5808637"))
         }
 
-        if (networkSync.isFailure){
-            Log.i("ssss" , networkSync.exceptionOrNull().toString())
-        }
         if (networkSync.isSuccess) {
             safeHelper.safeDatabase {
                 noteDAO.updateSyncData(true, note.id)
             }
+        } else {
+            worker.schedulerSync()
         }
 
 
@@ -69,13 +71,24 @@ class NoteRepositoryImpl @Inject constructor(
     }
 
     override fun getNoteData(): Flow<List<Note>> =
-        noteDAO.getNoteData().map { listNote ->
-            listNote.map { noteEntity ->
-                noteEntity.toDomain()
+
+        noteDAO.getNoteData()
+            .onStart {
+                if (noteDAO.getCountNote() == 0) {
+                    safeHelper.safeNetwork {
+                        api.getAllNote()
+                    }.onSuccess { list ->
+                        val entityList = list.map { it.toEntity() }
+                        noteDAO.syncNote(entityList)
+                    }
+                }
+            }.map { listEntity ->
+                listEntity.map { it.toDomain() }
             }
-        }.catch { e ->
-            Log.e("ERROR", "${e.message}")
-        }
+            .catch {
+                Log.e("ssss", it.toString())
+            }
+
 
     override suspend fun getNoteById(id: String): Note? {
         return noteDAO.getNoteDataById(id)?.toDomain()
@@ -106,6 +119,8 @@ class NoteRepositoryImpl @Inject constructor(
 
         if (networkSync.isSuccess) {
             noteDAO.updateSyncData(true, note.id)
+        } else {
+            worker.schedulerSync()
         }
         return Result.success(Unit)
     }
@@ -113,10 +128,8 @@ class NoteRepositoryImpl @Inject constructor(
     override suspend fun deleteNote(note: Note): Boolean {
 
         val roomDelete = safeHelper.safeDatabase {
-            noteDAO.deleteNote(
-                note.toEntity(
-                    false, sessionManager.getUserId
-                )
+            noteDAO.softDeleteNote(
+                note.id
             )
         }
 
@@ -126,14 +139,38 @@ class NoteRepositoryImpl @Inject constructor(
 
         val networkSync = safeHelper.safeNetwork { api.deleteNote("eq.${note.id}") }
 
-        if (networkSync.isFailure){
-            Log.i("ssss" , networkSync.exceptionOrNull().toString())
-        }
-
         if (networkSync.isSuccess) {
-            noteDAO.updateSyncData(true, note.id)
+            noteDAO.hardDeleteNote(note.id)
+        } else {
+            worker.schedulerSync()
         }
         return true
     }
 
+    override suspend fun unsyncedData() {
+
+        val roomData = safeHelper.safeDatabase { noteDAO.getNoteUnsynced() }
+
+
+        if (roomData.isFailure || roomData.getOrThrow().isEmpty()) return
+
+        val noteList = roomData.getOrNull() ?: return
+
+        val syncingData = safeHelper.safeNetwork {
+            api.unsyncedData(
+                noteList.map { note ->
+                    note.toDto()
+                }
+            )
+        }
+
+        if (syncingData.isFailure) return
+
+        safeHelper.safeDatabase {
+            noteList.forEach { note ->
+                noteDAO.updateSyncData(true, note.id)
+            }
+        }
+
+    }
 }

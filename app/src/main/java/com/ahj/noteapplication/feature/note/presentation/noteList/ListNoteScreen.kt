@@ -7,7 +7,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DeleteForever
@@ -37,8 +35,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -48,7 +44,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -60,12 +55,12 @@ import com.ahj.noteapplication.app.navigation.Screens
 import com.ahj.noteapplication.core.common.ui.component.BackgroundScreen
 import com.ahj.noteapplication.core.common.ui.component.CreateResultScreen
 import com.ahj.noteapplication.core.common.ui.component.CreateRichTextField
-import com.ahj.noteapplication.core.common.ui.component.CreateTextField
+import com.ahj.noteapplication.core.common.ui.component.CustomAlertDialog
 import com.ahj.noteapplication.core.common.ui.component.CustomAnimateVisibility
 import com.ahj.noteapplication.core.common.ui.component.GlassCard
+import com.ahj.noteapplication.core.common.utils.stripMarkdown
 import com.ahj.noteapplication.feature.note.domain.model.Note
 import com.mohamedrejeb.richeditor.model.RichTextState
-import kotlin.math.min
 
 
 @Composable
@@ -91,7 +86,7 @@ fun ListNoteScreen(
 
         searching.isEmpty() -> ListScreenStatus.NOTE_FOUND
 
-        uiState.message != null -> ListScreenStatus.ERROR
+        uiState.statusMessage != null -> ListScreenStatus.ERROR
         else -> ListScreenStatus.SUCCESS
     }
 
@@ -114,12 +109,12 @@ fun ListNoteScreen(
                 when (status) {
 
                     ListScreenStatus.EMPTY -> {
-                        CreateResultScreen("یادداشتی وجود ندارد.")
+                        CreateResultScreen(uiState.statusMessage)
                     }
 
 
                     ListScreenStatus.ERROR -> {
-                        CreateResultScreen(uiState.message)
+                        CreateResultScreen(uiState.statusMessage)
                     }
 
                     ListScreenStatus.NOTE_FOUND -> {
@@ -155,6 +150,11 @@ fun ListNoteScreen(
 
             }
 
+            CustomAlertDialog(uiState.message, uiState.stateDialog) {
+                viewModel.onEvent(ListNoteUiEvent.CloseDialog)
+            }
+
+
         }
 
 
@@ -181,7 +181,7 @@ fun NoteTopBar(
             "sync",
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier
-                .padding(horizontal =  5.dp)
+                .padding(horizontal = 5.dp)
                 .size(30.dp)
 
         )
@@ -193,7 +193,8 @@ fun NoteTopBar(
                 Icon(Icons.Default.Search, null, tint = MaterialTheme.colorScheme.primary)
             },
             textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.primary),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
     }
@@ -209,7 +210,7 @@ fun SampleNotes(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         items(item.size, { item[it].id }) {
@@ -294,7 +295,7 @@ fun NoteItem(
 
 
                 Text(
-                    note.body,
+                    note.body.stripMarkdown(),
                     style = MaterialTheme.typography.bodyLarge.copy(fontSize = 13.sp),
                     modifier = Modifier
                         .padding(10.dp),
