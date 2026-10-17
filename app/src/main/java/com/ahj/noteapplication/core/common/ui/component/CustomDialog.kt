@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -39,25 +41,27 @@ fun CustomAlertDialog(text: String?, state: Boolean, onDismiss: () -> Unit) {
             Card(
                 colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondary),
                 elevation = CardDefaults.cardElevation(6.dp),
-                modifier = Modifier.clickable(enabled = false) {}
+                modifier = Modifier
+                    .clickable(enabled = false) {}
                     .padding(horizontal = 20.dp)
             ) {
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(vertical = 20.dp)
+                    modifier = Modifier.padding(20.dp)
                 ) {
                     text?.let {
                         Text(
                             it,
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier
                                 .padding(horizontal = 20.dp),
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
 
+                    SpacerHeight(20)
                     InsertAuthButton("بستن", true) {
                         onDismiss()
                     }

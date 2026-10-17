@@ -26,6 +26,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mohamedrejeb.richeditor.model.RichTextState
@@ -34,7 +35,7 @@ import com.mohamedrejeb.richeditor.ui.BasicRichTextEditor
 @Composable
 fun CreateTextField(
     state: TextFieldState,
-    placeholder: String,
+    placeholder: String? = null,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
     isPasswordVisible: Boolean = true, // اگر false باشد، متن مخفی (Password) می‌شود
@@ -107,13 +108,15 @@ fun CreateTextField(
                 interactionSource = interactionSource,
                 isError = isError,
                 placeholder = {
-                    Text(
-                        text = placeholder,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontSize = placeholderSize.sp,
-                        textAlign = textAlign,
-                        color = Color.Gray
-                    )
+                    if (placeholder !=null){
+                        Text(
+                            text = placeholder,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontSize = placeholderSize.sp,
+                            textAlign = textAlign,
+                            color = Color.Gray
+                        )
+                    }
                 },
                 leadingIcon = leadingIcon,
                 trailingIcon = trailingIcon,
@@ -169,13 +172,18 @@ fun CreateRichTextField(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
     val mergeStyle = LocalTextStyle.current.merge(textStyle)
+    val textDigit = state.annotatedString.text.trim().firstOrNull()?.let {
+            char ->
+        char in '0'..'9' || char in '۰'..'۹'
+    } ?: false
+    val textDirection = if (textDigit) TextDirection.Ltr else TextDirection.Rtl
 
     BasicRichTextEditor(
         state = state,
         modifier = modifier.padding(paddingValue),
         enabled = enabled,
         readOnly = readOnly,
-        textStyle = mergeStyle,
+        textStyle = mergeStyle.copy(textDirection = textDirection),
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         singleLine = singleLine,
         interactionSource = interactionSource,

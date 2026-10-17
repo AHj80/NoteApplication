@@ -12,7 +12,6 @@ android {
     namespace = "com.ahj.noteapplication"
     compileSdk = 37
 
-
     defaultConfig {
         applicationId = "com.ahj.noteapplication"
         minSdk = 24
@@ -30,6 +29,7 @@ android {
 
         buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
         buildConfigField("String", "SUPABASE_APIKEY", "\"$supabaseApikey\"")
+
     }
 
     buildTypes {
@@ -133,5 +133,6 @@ dependencies {
     //worker
     implementation(libs.workmanager)
     implementation(libs.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
 
 }

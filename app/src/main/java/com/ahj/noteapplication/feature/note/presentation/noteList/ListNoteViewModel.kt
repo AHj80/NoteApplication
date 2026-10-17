@@ -57,10 +57,12 @@ class ListNoteViewModel @Inject constructor(
                 _uiState.update { it.copy(stateDialog = false) }
             }
 
+
             else -> {}
         }
 
     }
+
 
 
     private fun getNoteData() {
@@ -75,7 +77,7 @@ class ListNoteViewModel @Inject constructor(
                         )
                     }
                 }
-                .onEach { list ->
+                .collect { list ->
 
                     if (list.isEmpty()) {
                         _uiState.update {
@@ -87,11 +89,11 @@ class ListNoteViewModel @Inject constructor(
                         }
                     } else {
                         _uiState.update {
-                            it.copy(note = list, statusMessage = null)
+                            it.copy(note = list, statusMessage = null , status = ListScreenStatus.SUCCESS)
                         }
                     }
 
-                }.launchIn(viewModelScope)
+                }
 
 
         }

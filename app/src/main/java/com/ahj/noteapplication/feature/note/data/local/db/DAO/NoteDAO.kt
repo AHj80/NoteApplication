@@ -40,6 +40,6 @@ interface NoteDAO {
     @Upsert
     suspend fun syncNote(noteEntity: List<NoteEntity>)
 
-    @Query("SELECT * FROM NoteEntity WHERE synced = 1")
+    @Query("SELECT * FROM NoteEntity WHERE synced = 0")
     suspend fun getNoteUnsynced(): List<NoteEntity>
 }

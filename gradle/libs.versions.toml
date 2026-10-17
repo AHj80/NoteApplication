@@ -101,11 +101,13 @@ tink-android = { module = "com.google.crypto.tink:tink-android", version.ref = "
 mock-server = { group = "com.squareup.okhttp3", name = "mockwebserver", version = "4.12.0" }
 
 #Rich Text Editor
-richtexteditor = { group = "com.mohamedrejeb.richeditor", name = "richeditor-compose" , version = "1.2.1"}
+richtexteditor = { group = "com.mohamedrejeb.richeditor", name = "richeditor-compose", version = "1.2.1" }
 
 #Work Manager
-workmanager = {group = "androidx.work" , name = "work-runtime-ktx" , version = "2.9.0" }
-hilt-work = { group = "androidx.hilt" , name = "hilt-work" , version = "1.2.0" }
+workmanager = { group = "androidx.work", name = "work-runtime-ktx", version = "2.12.0" }
+hilt-work = { group = "androidx.hilt", name = "hilt-work", version = "1.4.0" }
+androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version = "1.4.0" }
+
 
 
 [plugins]

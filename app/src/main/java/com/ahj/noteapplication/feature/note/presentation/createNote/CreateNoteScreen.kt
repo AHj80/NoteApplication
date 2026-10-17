@@ -1,7 +1,14 @@
 package com.ahj.noteapplication.feature.note.presentation.createNote
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -16,8 +24,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ContentPasteGo
 import androidx.compose.material.icons.filled.FormatBold
 import androidx.compose.material.icons.filled.FormatItalic
 import androidx.compose.material.icons.filled.FormatSize
@@ -34,9 +46,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,28 +59,47 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.ahj.noteapplication.core.common.ui.component.CreateResultScreen
 import com.ahj.noteapplication.core.common.ui.component.CreateRichTextField
 import com.ahj.noteapplication.core.common.ui.component.CustomAlertDialog
 import com.ahj.noteapplication.core.common.ui.component.CustomAnimateVisibility
 import com.ahj.noteapplication.core.common.ui.component.CustomProgress
 import com.ahj.noteapplication.core.common.ui.component.GlassCard
 import com.ahj.noteapplication.core.common.ui.component.SpacerHeight
+import com.ahj.noteapplication.feature.authentication.component.CustomAnimatedContent
+import com.ahj.noteapplication.feature.note.component.CustomModalGlass
+import com.ahj.noteapplication.feature.note.domain.model.TextActions
+import com.ahj.noteapplication.feature.note.domain.model.UserActionAI
+import com.ahj.noteapplication.feature.note.presentation.createNote.ai.AIStatus
+import com.ahj.noteapplication.feature.note.presentation.createNote.ai.AIUiEvent
+import com.ahj.noteapplication.feature.note.presentation.createNote.ai.AIViewModel
+import com.ahj.noteapplication.feature.note.presentation.createNote.create.CreateNoteStatus
+import com.ahj.noteapplication.feature.note.presentation.createNote.create.CreateNoteUiEvent
+import com.ahj.noteapplication.feature.note.presentation.createNote.create.CreateNoteViewModel
 import com.mohamedrejeb.richeditor.model.RichTextState
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @Composable
 fun CreateNoteScreen(
     navController: NavController,
-    viewModel: CreateNoteViewModel = hiltViewModel()
+    createNoteViewModel: CreateNoteViewModel = hiltViewModel(),
+    aiViewModel: AIViewModel = hiltViewModel()
 ) {
 
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val onEvent = viewModel::onEvent
+    val createUiState by createNoteViewModel.uiState.collectAsStateWithLifecycle()
+    val aiUiState by aiViewModel.uiState.collectAsStateWithLifecycle()
+    val createOnEvent = createNoteViewModel::onEvent
+
 
     var bottomBarHeight by remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current
@@ -81,8 +114,12 @@ fun CreateNoteScreen(
         Box {
 
             Column {
-                TextTitle(uiState.titleState)
-                TextBody(uiState.bodyState, size = uiState.stateFont, Modifier.weight(1f))
+                TextTitle(createUiState.titleState)
+                TextBody(
+                    createUiState.bodyState,
+                    size = createUiState.stateFont,
+                    Modifier.weight(1f)
+                )
                 HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -98,22 +135,22 @@ fun CreateNoteScreen(
                         }
                 ) {
 
-                    ToolsCreateNote(uiState.bodyState) { onEvent(it) }
+                    ToolsCreateNote(createUiState.bodyState) { createOnEvent(it) }
                     SpacerHeight(5)
 
                     BottomItem(
-                        backStack = { navController.popBackStack() }) { onEvent(it) }
+                        backStack = { navController.popBackStack() }) { createOnEvent(it) }
                 }
             }
 
             CustomAnimateVisibility(
-                state = uiState.selectingFontSize,
+                state = createUiState.selectingFontSize,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(bottom = bottomBarHeight)
             ) {
-                FontItem(uiState.fontList, uiState.stateFont) {
-                    onEvent(
+                FontItem(createUiState.fontList, createUiState.stateFont) {
+                    createOnEvent(
                         it
                     )
                 }
@@ -121,20 +158,31 @@ fun CreateNoteScreen(
         }
     }
 
-    CustomAnimateVisibility(uiState.status == CreateNoteStatus.LOADING) {
+    CustomAnimateVisibility(createUiState.status == CreateNoteStatus.LOADING) {
         CustomProgress()
     }
 
+
+    AIModalBottom(
+        createUiState.aiBottomSheet,
+        aiUiState.aiResponse,
+        createUiState.bodyState.annotatedString.text,
+        aiUiState.status,
+        onDismiss = { createOnEvent(CreateNoteUiEvent.ChangeModalAI(false)) },
+        addTextAI = { createOnEvent(CreateNoteUiEvent.SetAIResponse(it)) }
+    ) { aiViewModel.onEvent(it) }
+
     CustomAlertDialog(
-        uiState.message,
-        uiState.dialog
-    ) { onEvent(CreateNoteUiEvent.CloseAlertDialog) }
+        createUiState.message,
+        createUiState.dialog
+    ) { createOnEvent(CreateNoteUiEvent.CloseAlertDialog) }
+
 
 }
 
 
 @Composable
-fun TextTitle(
+private fun TextTitle(
     title: RichTextState
 ) {
 
@@ -154,11 +202,12 @@ fun TextTitle(
 
 
 @Composable
-fun TextBody(
+private fun TextBody(
     body: RichTextState,
     size: Int,
     modifier: Modifier
 ) {
+
 
     LazyColumn(
         modifier = modifier
@@ -184,7 +233,7 @@ fun TextBody(
 }
 
 @Composable
-fun InsertNoteAction(
+private fun InsertNoteAction(
     text: String,
     container: Color,
     textColor: Color,
@@ -214,6 +263,9 @@ private fun ToolsCreateNote(
     richText: RichTextState,
     onEvent: (CreateNoteUiEvent) -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     val aiColor = Brush.linearGradient(
         listOf(
             Color(0xFF0B2AF5),
@@ -237,7 +289,9 @@ private fun ToolsCreateNote(
     ) {
         IconButton(
             {
-
+                focusManager.clearFocus()
+                keyboardController?.hide()
+                onEvent(CreateNoteUiEvent.ChangeModalAI(true))
             },
             modifier = Modifier
                 .clip(RoundedCornerShape(10.dp))
@@ -246,14 +300,13 @@ private fun ToolsCreateNote(
             colors = IconButtonDefaults.iconButtonColors(
                 containerColor = Color.Transparent,
             ),
+            enabled = richText.annotatedString.text.isNotBlank()
         ) {
-
             Text(
                 "AI",
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White,
             )
-
         }
 
         listIcons.forEachIndexed { index, icon ->
@@ -359,4 +412,162 @@ private fun BottomItem(
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
         ) { backStack() }
     }
+}
+
+
+@Composable
+private fun AIModalBottom(
+    visibility: Boolean,
+    aiResponse: String?,
+    bodyText: String,
+    status: AIStatus,
+    onDismiss: () -> Unit,
+    addTextAI: (String) -> Unit,
+    onEvent: (AIUiEvent) -> Unit
+) {
+
+    var processAI by rememberSaveable { mutableStateOf(false) }
+    BackHandler(visibility, onBack = onDismiss)
+
+    val promptList = listOf(
+        UserActionAI("کوتاه کردن متن", TextActions.SHORT),
+        UserActionAI("گسترش متن", TextActions.LONG),
+        UserActionAI("ترجمه متن", TextActions.TRANSLATE),
+        UserActionAI("حل مسئله ریاضی", TextActions.PROCESS_MATH)
+    )
+
+
+
+    CustomAnimateVisibility(
+        visibility,
+        enter = slideInVertically(
+            initialOffsetY = { fullHeight -> fullHeight }, // شروع از پایین صفحه (خارج از کادر)
+            animationSpec = tween(durationMillis = 400) // تنظیم سرعت انیمیشن (مثلاً 400 میلی‌ثانیه)
+        ) + fadeIn(
+            animationSpec = tween(durationMillis = 300)
+        ),
+        exit = slideOutVertically(
+            targetOffsetY = { fullHeight -> fullHeight }, // خروج به سمت پایین صفحه
+            animationSpec = tween(durationMillis = 400)
+        ) + fadeOut(
+            animationSpec = tween(durationMillis = 300)
+        )
+    ) {
+        CustomModalGlass(
+            modifier = Modifier.fillMaxHeight(0.5f),
+            onDismiss
+        ) {
+
+            CustomAnimateVisibility(processAI) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(end = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    IconButton(
+                        { aiResponse?.let { addTextAI(it) } },
+                        colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.secondary),
+
+                        ) {
+                        Icon(
+                            Icons.Default.ContentPasteGo,
+                            null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    IconButton(
+                        { processAI = false },
+                        colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowForward,
+                            null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                }
+            }
+
+
+            CustomAnimatedContent(processAI) { state ->
+                if (state) {
+                    when (status) {
+                        AIStatus.IDLE -> {}
+                        AIStatus.LOADING -> {
+                            CustomProgress()
+                        }
+
+                        AIStatus.SUCCESS -> {
+                            aiResponse?.let {
+                                AIResponse(aiResponse)
+                            }
+                        }
+
+                        AIStatus.ERROR -> {
+                            CreateResultScreen(aiResponse)
+                        }
+                    }
+
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(10.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+
+                    ) {
+                        promptList.forEach { prompt ->
+                            SpacerHeight(20)
+
+                            InsertNoteAction(
+                                prompt.prompt,
+                                MaterialTheme.colorScheme.secondary,
+                                MaterialTheme.colorScheme.primary
+                            ) {
+                                onEvent(AIUiEvent.Action(bodyText, prompt.action))
+                                processAI = true
+                            }
+
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun AIResponse(
+    response: String?
+) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 30.dp, vertical = 20.dp)
+            .verticalScroll(rememberScrollState())
+            .border(
+                BorderStroke(2.dp, Color.White.copy(alpha = 0.5f)),
+                shape = RoundedCornerShape(topStart = 15.dp)
+            ),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        response?.let {
+            Text(
+             it,
+                style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Rtl),
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(10.dp)
+            )
+        }
+
+    }
+
+
 }

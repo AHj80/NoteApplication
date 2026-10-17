@@ -1,16 +1,16 @@
-package com.ahj.noteapplication.feature.note.presentation.createNote
+package com.ahj.noteapplication.feature.note.presentation.createNote.create
 
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ahj.noteapplication.app.navigation.Screens
 import com.ahj.noteapplication.core.common.utils.PersianDate
-import com.ahj.noteapplication.core.common.utils.stripMarkdown
 import com.ahj.noteapplication.feature.note.domain.model.Note
 import com.ahj.noteapplication.feature.note.domain.usecase.AddNoteUseCase
 import com.ahj.noteapplication.feature.note.domain.usecase.GetNoteByIdUseCase
@@ -36,15 +36,16 @@ class CreateNoteViewModel @Inject constructor(
     val uiState: StateFlow<CreateNoteUiState> = _uiState.asStateFlow()
     private val _args = savedStateHandle.toRoute<Screens.CreateScreen>()
 
+    private var _currentId: String = _args.id
 
     init {
         getNoteById()
     }
 
 
-    fun onEvent(onEvent: CreateNoteUiEvent) {
+    fun onEvent(event: CreateNoteUiEvent) {
 
-        when (onEvent) {
+        when (event) {
             is CreateNoteUiEvent.SaveNote ->{
                 val title = _uiState.value.titleState.annotatedString.text.isBlank()
                 val body = _uiState.value.bodyState.annotatedString.text.isBlank()
@@ -54,15 +55,15 @@ class CreateNoteViewModel @Inject constructor(
                     upsertNote()
             }
             is CreateNoteUiEvent.BoldText -> {
-                onEvent.state.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.ExtraBold))
+                event.state.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.ExtraBold , fontSize = 18.sp))
             }
 
             is CreateNoteUiEvent.ItalicText -> {
-                onEvent.state.toggleSpanStyle(SpanStyle(fontStyle = FontStyle.Italic))
+                event.state.toggleSpanStyle(SpanStyle(fontStyle = FontStyle.Italic))
             }
 
             is CreateNoteUiEvent.UnderlineText -> {
-                onEvent.state.toggleSpanStyle(SpanStyle(textDecoration = TextDecoration.Underline))
+                event.state.toggleSpanStyle(SpanStyle(textDecoration = TextDecoration.Underline))
             }
 
             is CreateNoteUiEvent.SelectingFontSize -> {
@@ -70,13 +71,18 @@ class CreateNoteViewModel @Inject constructor(
             }
 
             is CreateNoteUiEvent.EditFontSize -> {
-                _uiState.update { it.copy(stateFont = onEvent.state) }
+                _uiState.update { it.copy(stateFont = event.state) }
             }
 
             is CreateNoteUiEvent.CloseAlertDialog -> {
                 _uiState.update { it.copy(status = CreateNoteStatus.IDLE , dialog = false) }
             }
-
+            is CreateNoteUiEvent.ChangeModalAI -> {
+                _uiState.update { it.copy(aiBottomSheet = event.state) }
+            }
+            is CreateNoteUiEvent.SetAIResponse -> {
+                _uiState.update { it.copy(bodyState = it.bodyState.setText(event.state)) }
+            }
         }
 
     }
@@ -90,17 +96,18 @@ class CreateNoteViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.update { it.copy(status = CreateNoteStatus.LOADING , message = null) }
-            if (_args.id.isNullOrBlank()) {
+            if (_currentId.isBlank()) {
                 addNoteUseCase(
                     state.titleState.annotatedString.text,
                     state.bodyState.toMarkdown(),
                     persianDate.getShortDate(),
                     state.stateFont
                 )
-                    .onSuccess {
+                    .onSuccess { id->
                         _uiState.update {
                             it.copy(message = "ذخیره گردید" , dialog = true , status = CreateNoteStatus.SUCCESS)
                         }
+                        _currentId = id
                     }
                     .onFailure { error ->
                         _uiState.update {
@@ -108,13 +115,15 @@ class CreateNoteViewModel @Inject constructor(
                         }
                     }
             } else {
-                val note = Note(
-                    _args.id,
-                    title = state.titleState.annotatedString.text,
-                    body = state.bodyState.toMarkdown(),
-                    date = persianDate.getCustomDate(),
-                    fontSize = state.stateFont
-                )
+
+                    val note = Note(
+                        _currentId,
+                        title = state.titleState.annotatedString.text,
+                        body = state.bodyState.toMarkdown(),
+                        date = persianDate.getShortDate(),
+                        fontSize = state.stateFont
+                    )
+
                 updateNoteUseCase(note)
                     .onSuccess {
                         _uiState.update {
@@ -133,14 +142,14 @@ class CreateNoteViewModel @Inject constructor(
 
     private fun getNoteById() {
         viewModelScope.launch {
-            if (!_args.id.isNullOrBlank())
-                getNoteByIdUseCase(_args.id)?.let { note ->
+            if (_args.id.isNotBlank())
+                getNoteByIdUseCase(_currentId)?.let { note ->
 
                     _uiState.update {
                         it.copy(
                             stateFont = note.fontSize,
                             titleState = it.titleState.setText(note.title),
-                            bodyState = it.bodyState.setMarkdown(note.body.stripMarkdown())
+                            bodyState = it.bodyState.setMarkdown(note.body)
                         )
                     }
                 }

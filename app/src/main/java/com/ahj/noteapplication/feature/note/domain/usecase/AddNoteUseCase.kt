@@ -9,12 +9,13 @@ class AddNoteUseCase @Inject constructor(
     private val repositoryNote: RepositoryNote
 ) {
 
+    private val _id = UUID.randomUUID().toString()
     suspend operator fun invoke(
         title: String,
         body: String,
         date: String,
         fontSize: Int
-        ): Result<Unit> {
+        ): Result<String> {
 
 
 
@@ -23,13 +24,15 @@ class AddNoteUseCase @Inject constructor(
         else
             repositoryNote.addNote(
                 Note(
-                    id = UUID.randomUUID().toString(),
+                    id = _id ,
                     title =title,
                     body = body,
                     date = date,
                     fontSize = fontSize
                 )
-            )
+            ).map {
+                _id
+            }
     }
 
 }

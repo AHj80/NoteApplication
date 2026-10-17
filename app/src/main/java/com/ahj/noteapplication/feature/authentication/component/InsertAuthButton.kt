@@ -1,10 +1,7 @@
 package com.ahj.noteapplication.feature.authentication.component
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +35,7 @@ fun InsertAuthButton(
             text,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.secondary,
-            fontSize = 16.sp,
+            fontSize = 12.sp,
             modifier = modifier
         )
     }

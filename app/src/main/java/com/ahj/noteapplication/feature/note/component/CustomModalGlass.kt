@@ -1,5 +1,6 @@
 package com.ahj.noteapplication.feature.note.component
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -7,25 +8,29 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.unit.dp
-import com.ahj.noteapplication.core.common.ui.component.GlassCard
 import com.ahj.noteapplication.core.common.ui.component.SpacerHeight
 
 
 @Composable
 fun CustomModalGlass(
+    modifier: Modifier = Modifier,
     onDismiss: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -45,9 +50,17 @@ fun CustomModalGlass(
         Box(
             Modifier.clickable(enabled = false) {}
         ) {
-            GlassCard(
-                corner = RoundedCornerShape(topStart = 40.dp, 40.dp),
-                padding = 0,
+
+            Card(
+                shape = RoundedCornerShape(topStart = 40.dp, 40.dp),
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(0.dp)
+                    .clip(RoundedCornerShape(topStart = 40.dp, 40.dp)),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.9f),
+                ),
+                border = BorderStroke(2.dp, color = Color.White.copy(alpha = 0.3f)),
             ) {
                 SpacerHeight(20)
                 Row(

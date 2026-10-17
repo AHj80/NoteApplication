@@ -16,10 +16,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudOff
@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +58,7 @@ import com.ahj.noteapplication.core.common.ui.component.CreateResultScreen
 import com.ahj.noteapplication.core.common.ui.component.CreateRichTextField
 import com.ahj.noteapplication.core.common.ui.component.CustomAlertDialog
 import com.ahj.noteapplication.core.common.ui.component.CustomAnimateVisibility
+import com.ahj.noteapplication.core.common.ui.component.CustomProgress
 import com.ahj.noteapplication.core.common.ui.component.GlassCard
 import com.ahj.noteapplication.core.common.utils.stripMarkdown
 import com.ahj.noteapplication.feature.note.domain.model.Note
@@ -70,26 +72,6 @@ fun ListNoteScreen(
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val searchQuery = uiState.stateSearching.annotatedString.text
-    val searching by remember(searchQuery, uiState.note) {
-        derivedStateOf {
-            if (searchQuery.isBlank())
-                uiState.note
-            else uiState.note.filter {
-                it.title.contains(searchQuery)
-            }
-        }
-    }
-
-    val screenStatus = when {
-        uiState.note.isEmpty() -> ListScreenStatus.EMPTY
-
-        searching.isEmpty() -> ListScreenStatus.NOTE_FOUND
-
-        uiState.statusMessage != null -> ListScreenStatus.ERROR
-        else -> ListScreenStatus.SUCCESS
-    }
-
 
 
     Scaffold(
@@ -100,7 +82,7 @@ fun ListNoteScreen(
         BackgroundScreen(paddingValues = PaddingValues(top = innerPadding.calculateTopPadding())) {
 
             AnimatedContent(
-                targetState = screenStatus,
+                targetState = uiState.listStatusScreen,
                 transitionSpec = {
                     fadeIn(animationSpec = tween(delayMillis = 500)) togetherWith
                             fadeOut(animationSpec = tween(delayMillis = 500))
@@ -121,9 +103,13 @@ fun ListNoteScreen(
                         CreateResultScreen("یادداشتی یافت نشد!")
                     }
 
+                    ListScreenStatus.LOADING -> {
+                        CustomProgress()
+                    }
+
                     else -> {
                         SampleNotes(
-                            searching
+                            uiState.searchNote
                         ) { event ->
                             if (event is ListNoteUiEvent.Navigating)
                                 navController.navigate(Screens.CreateScreen(event.state))
@@ -133,32 +119,22 @@ fun ListNoteScreen(
 
 
                 }
+            }
 
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .navigationBarsPadding(),
-                    contentAlignment = Alignment.BottomCenter
-                ) {
-                    BottomBar {
-                        if (it is ListNoteUiEvent.Navigating) {
-                            navController.navigate(Screens.CreateScreen(it.state))
-                        }
-                    }
+            BottomBar {
+                if (it is ListNoteUiEvent.Navigating) {
+                    navController.navigate(Screens.CreateScreen(it.state))
                 }
-
             }
+        }
 
-            CustomAlertDialog(uiState.message, uiState.stateDialog) {
-                viewModel.onEvent(ListNoteUiEvent.CloseDialog)
-            }
-
-
+        CustomAlertDialog(uiState.message, uiState.stateDialog) {
+            viewModel.onEvent(ListNoteUiEvent.CloseDialog)
         }
 
 
     }
+
 
 }
 
@@ -325,26 +301,33 @@ fun BottomBar(
 ) {
 
 
-    Row(
-        Modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 10.dp),
+        contentAlignment = Alignment.BottomCenter
     ) {
-        Button(
-            { onEvent(ListNoteUiEvent.Navigating("")) },
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-            elevation = ButtonDefaults.buttonElevation(4.dp)
+        Row(
+            Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
         ) {
-            Text(
-                "+",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.secondary
-            )
+            Button(
+                { onEvent(ListNoteUiEvent.Navigating("")) },
+                shape = CircleShape,
+                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+                elevation = ButtonDefaults.buttonElevation(4.dp)
+            ) {
+                Text(
+                    "+",
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
+
+
         }
-
-
     }
 }
 
@@ -387,9 +370,10 @@ private fun HoldingItem(
                 }
 
                 Text(
-                    date,
+                    "تاریخ ثبت: $date",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 10.sp
                 )
             }
 

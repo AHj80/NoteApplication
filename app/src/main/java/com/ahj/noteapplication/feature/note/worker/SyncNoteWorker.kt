@@ -1,6 +1,7 @@
 package com.ahj.noteapplication.feature.note.worker
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -21,6 +22,7 @@ class SyncNoteWorker @AssistedInject constructor(
             repository.unsyncedData()
             Result.success()
         }catch (e: Exception){
+            Log.i("ahj-worker" , e.message.toString())
             if (runAttemptCount<3)
                 Result.retry()
             else {

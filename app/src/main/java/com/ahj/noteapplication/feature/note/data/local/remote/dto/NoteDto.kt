@@ -1,4 +1,4 @@
-package com.ahj.noteapplication.feature.note.data.local.remote
+package com.ahj.noteapplication.feature.note.data.local.remote.dto
 
 import kotlinx.serialization.Serializable
 

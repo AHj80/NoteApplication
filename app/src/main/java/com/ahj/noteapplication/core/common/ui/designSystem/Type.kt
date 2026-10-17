@@ -32,7 +32,7 @@ val customTypography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 1.sp,
-        textDirection = TextDirection.Rtl
+        textDirection = TextDirection.Content
     ),
     titleLarge = TextStyle(
         fontFamily = vazirmatn,
@@ -40,7 +40,7 @@ val customTypography = Typography(
         fontSize = 18.sp,
         lineHeight = 28.sp,
         letterSpacing = 1.sp,
-        textDirection = TextDirection.Rtl
+        textDirection = TextDirection.Content
 
     ),
 

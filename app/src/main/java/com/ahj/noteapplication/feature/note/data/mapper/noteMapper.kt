@@ -1,7 +1,7 @@
 package com.ahj.noteapplication.feature.note.data.mapper
 
 import com.ahj.noteapplication.feature.note.data.local.db.entities.NoteEntity
-import com.ahj.noteapplication.feature.note.data.local.remote.NoteDto
+import com.ahj.noteapplication.feature.note.data.local.remote.dto.NoteDto
 import com.ahj.noteapplication.feature.note.domain.model.Note
 
 

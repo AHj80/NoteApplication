@@ -5,6 +5,7 @@ import com.ahj.noteapplication.core.common.utils.SafeHelper
 import com.ahj.noteapplication.core.sessionManager.SessionManager
 import com.ahj.noteapplication.feature.note.data.local.db.DAO.NoteDAO
 import com.ahj.noteapplication.feature.note.data.local.remote.NoteApiService
+import com.ahj.noteapplication.feature.note.data.local.remote.dto.AIRequestDto
 import com.ahj.noteapplication.feature.note.data.mapper.toDomain
 import com.ahj.noteapplication.feature.note.data.mapper.toDto
 import com.ahj.noteapplication.feature.note.data.mapper.toEntity
@@ -89,7 +90,6 @@ class NoteRepositoryImpl @Inject constructor(
                 Log.e("ssss", it.toString())
             }
 
-
     override suspend fun getNoteById(id: String): Note? {
         return noteDAO.getNoteDataById(id)?.toDomain()
     }
@@ -125,6 +125,7 @@ class NoteRepositoryImpl @Inject constructor(
         return Result.success(Unit)
     }
 
+
     override suspend fun deleteNote(note: Note): Boolean {
 
         val roomDelete = safeHelper.safeDatabase {
@@ -151,10 +152,10 @@ class NoteRepositoryImpl @Inject constructor(
 
         val roomData = safeHelper.safeDatabase { noteDAO.getNoteUnsynced() }
 
-
         if (roomData.isFailure || roomData.getOrThrow().isEmpty()) return
 
         val noteList = roomData.getOrNull() ?: return
+
 
         val syncingData = safeHelper.safeNetwork {
             api.unsyncedData(
@@ -163,6 +164,9 @@ class NoteRepositoryImpl @Inject constructor(
                 }
             )
         }
+
+        if (syncingData.isFailure)
+            Log.i("ahj-worker" , syncingData.exceptionOrNull()?.message.toString())
 
         if (syncingData.isFailure) return
 
@@ -173,4 +177,9 @@ class NoteRepositoryImpl @Inject constructor(
         }
 
     }
+
+    override suspend fun textPrompt(prompt: String): Result<String> =
+        safeHelper.safeAIResponse {
+            api.aiRequest(AIRequestDto(prompt))
+        }.map { it.result }
 }

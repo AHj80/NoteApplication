@@ -1,6 +1,7 @@
 package com.ahj.noteapplication.feature.note.worker
 
 import android.content.Context
+import android.util.Log
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -38,6 +39,7 @@ class NoteWorkerScheduler @Inject constructor(
                 request
             )
 
+        Log.i("ahj-worker" , "success")
     }
 
     fun schedulerSyncPeriodic() {
@@ -47,7 +49,7 @@ class NoteWorkerScheduler @Inject constructor(
             .build()
 
         val request = PeriodicWorkRequestBuilder<SyncNoteWorker>(
-            15, TimeUnit.MINUTES
+            12, TimeUnit.HOURS
         )
             .setConstraints(constraint)
             .build()

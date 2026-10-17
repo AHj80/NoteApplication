@@ -21,5 +21,7 @@ interface RepositoryNote {
 
     suspend fun syncNoteData(note: List<Note>): Result<Unit>
 
+    suspend fun textPrompt(prompt: String): Result<String>
+
 
 }

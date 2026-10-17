@@ -1,6 +1,7 @@
 package com.ahj.noteapplication.app.base
 
 import android.app.Application
+import android.util.Log
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.ahj.noteapplication.feature.note.worker.NoteWorkerScheduler
@@ -23,9 +24,12 @@ class MyApplication : Application(), Configuration.Provider {
     }
 
     override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .build()
+        get()  {
+            Log.d("WorkerDebug", "Custom WorkManager configuration")
+            return Configuration.Builder()
+                .setWorkerFactory(workerFactory)
+                .build()
+        }
 
 
 }
