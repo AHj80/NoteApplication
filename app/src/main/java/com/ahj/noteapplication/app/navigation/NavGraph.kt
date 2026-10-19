@@ -3,9 +3,6 @@ package com.ahj.noteapplication.app.navigation
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -60,10 +57,7 @@ fun SetUi() {
                     }
                 }
 
-                composable<Screens.ListNoteScreens>(
-                    enterTransition = { enterTransition },
-                    exitTransition = { exitTransition }
-                ) {
+                composable<Screens.ListNoteScreens> {
 
                     CompositionLocalProvider(
                         LocalSharedTransitionScope provides this@SharedTransitionLayout,
@@ -76,10 +70,7 @@ fun SetUi() {
                     }
                 }
 
-                composable<Screens.CreateScreen>(
-                    enterTransition = { enterTransition },
-                    exitTransition = { exitTransition }
-                ) {
+                composable<Screens.CreateScreen> {
 
                     val input = it.toRoute<Screens.CreateScreen>()
                     CompositionLocalProvider(
@@ -107,5 +98,4 @@ val LocalNavAnimateVisibilityScope = staticCompositionLocalOf<AnimatedVisibility
     error("AnimateVisibilityScope not found")
 }
 
-private val enterTransition = fadeIn(tween(1000))
-private val exitTransition = fadeOut(tween(10800))
+

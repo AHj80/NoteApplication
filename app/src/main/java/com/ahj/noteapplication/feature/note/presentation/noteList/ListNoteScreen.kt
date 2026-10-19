@@ -27,7 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SyncProblem
 import androidx.compose.material3.Button
@@ -77,14 +76,12 @@ fun ListNoteScreen(
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var morePanel by remember { mutableStateOf(false) }
+
 
 
     Scaffold(
         topBar = {
-            NoteTopBar(uiState.stateSearching, uiState.isUnsynced) {
-                morePanel = !morePanel
-            }
+            NoteTopBar(uiState.stateSearching, uiState.isUnsynced)
         },
     ) { innerPadding ->
 
@@ -151,8 +148,7 @@ fun ListNoteScreen(
 @Composable
 fun NoteTopBar(
     state: RichTextState,
-    isUnsynced: Boolean,
-    morePanel: () -> Unit
+    isUnsynced: Boolean
 ) {
 
     val context = LocalContext.current
@@ -165,18 +161,7 @@ fun NoteTopBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        IconButton(
-            onClick = morePanel,
-            modifier = Modifier.size(30.dp)
-        ) {
-            Icon(
-                Icons.Default.MoreVert,
-                "More",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .padding(start = 5.dp)
-            )
-        }
+
 
         if (isUnsynced)
             IconButton({
