@@ -40,7 +40,7 @@ class NoteRepositoryImpl @Inject constructor(
         }
 
         val networkSync = safeHelper.safeNetwork {
-            api.insertNote(note.toDto("7fdcf63c-a148-4e95-87b0-197fc5808637"))
+            api.insertNote(note.toDto(sessionManager.getUserId))
         }
 
         if (networkSync.isSuccess) {
@@ -87,7 +87,7 @@ class NoteRepositoryImpl @Inject constructor(
                 listEntity.map { it.toDomain() }
             }
             .catch {
-                Log.e("ssss", it.toString())
+                Log.e("get_note_error", it.toString())
             }
 
     override suspend fun getNoteById(id: String): Note? {
@@ -112,7 +112,7 @@ class NoteRepositoryImpl @Inject constructor(
         val networkSync =
             safeHelper.safeNetwork {
                 api.insertNote(
-                    note.toDto("7fdcf63c-a148-4e95-87b0-197fc5808637")
+                    note.toDto(sessionManager.getUserId)
                 )
             }
 
@@ -127,7 +127,6 @@ class NoteRepositoryImpl @Inject constructor(
 
 
     override suspend fun deleteNote(note: Note): Boolean {
-
         val roomDelete = safeHelper.safeDatabase {
             noteDAO.softDeleteNote(
                 note.id
@@ -165,8 +164,6 @@ class NoteRepositoryImpl @Inject constructor(
             )
         }
 
-        if (syncingData.isFailure)
-            Log.i("ahj-worker" , syncingData.exceptionOrNull()?.message.toString())
 
         if (syncingData.isFailure) return
 
@@ -182,4 +179,10 @@ class NoteRepositoryImpl @Inject constructor(
         safeHelper.safeAIResponse {
             api.aiRequest(AIRequestDto(prompt))
         }.map { it.result }
+
+    override fun getExistsUnsynced(): Flow<Boolean> {
+        return noteDAO.getExistsUnsynced()
+    }
+
+
 }

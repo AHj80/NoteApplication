@@ -23,5 +23,7 @@ interface RepositoryNote {
 
     suspend fun textPrompt(prompt: String): Result<String>
 
+    fun getExistsUnsynced(): Flow<Boolean>
+
 
 }

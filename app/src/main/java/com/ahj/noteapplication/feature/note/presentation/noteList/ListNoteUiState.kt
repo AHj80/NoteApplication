@@ -11,7 +11,8 @@ data class ListNoteUiState(
     val status: ListScreenStatus = ListScreenStatus.EMPTY,
     val windowHolding: Boolean = false,
     val selectedNote: String? = null,
-    val stateDialog: Boolean = false
+    val stateDialog: Boolean = false,
+    val isUnsynced: Boolean = false
 ) {
 
     val searchNote: List<Note>

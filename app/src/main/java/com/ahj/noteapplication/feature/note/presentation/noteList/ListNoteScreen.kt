@@ -1,5 +1,6 @@
 package com.ahj.noteapplication.feature.note.presentation.noteList
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -22,6 +23,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Search
@@ -36,8 +38,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -75,7 +76,7 @@ fun ListNoteScreen(
 
 
     Scaffold(
-        topBar = { NoteTopBar(uiState.stateSearching) },
+        topBar = { NoteTopBar(uiState.stateSearching, uiState.isUnsynced) },
     ) { innerPadding ->
 
 
@@ -140,8 +141,11 @@ fun ListNoteScreen(
 
 @Composable
 fun NoteTopBar(
-    state: RichTextState
+    state: RichTextState,
+    isUnsynced: Boolean
 ) {
+
+    val context = LocalContext.current
 
     Row(
         modifier = Modifier
@@ -150,17 +154,36 @@ fun NoteTopBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
+        if (isUnsynced)
+            IconButton({
+                Toast.makeText(context, "یادداشت ها به طور همگام سازی خواهند شد.", Toast.LENGTH_SHORT)
+                    .show()
+            }) {
+                Icon(
+                    Icons.Default.SyncProblem,
+                    "Unsynced",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .padding(horizontal = 5.dp)
+                        .size(30.dp)
+                )
+            }
+        else
+            IconButton({
+                Toast.makeText(context, "یادداشت همگام سازی نشده ای وجود ندارد", Toast.LENGTH_SHORT)
+                    .show()
+            }) {
+                Icon(
+                    Icons.Default.CloudDone,
+                    "Synced",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .padding(horizontal = 5.dp)
+                        .size(30.dp)
+                )
+            }
 
 
-        Icon(
-            Icons.Default.SyncProblem,
-            "sync",
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .padding(horizontal = 5.dp)
-                .size(30.dp)
-
-        )
 
         CreateRichTextField(
             state = state,

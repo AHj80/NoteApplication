@@ -4,7 +4,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -46,16 +45,23 @@ class CreateNoteViewModel @Inject constructor(
     fun onEvent(event: CreateNoteUiEvent) {
 
         when (event) {
-            is CreateNoteUiEvent.SaveNote ->{
+            is CreateNoteUiEvent.SaveNote -> {
                 val title = _uiState.value.titleState.annotatedString.text.isBlank()
                 val body = _uiState.value.bodyState.annotatedString.text.isBlank()
                 if (title || body)
-                    _uiState.update { it.copy(message = "عنوان و متن بدنه ی یادداشت نمیتواند خالی باشد" , status = CreateNoteStatus.ERROR , dialog = true) }
+                    _uiState.update {
+                        it.copy(
+                            message = "عنوان و متن بدنه ی یادداشت نمیتواند خالی باشد",
+                            status = CreateNoteStatus.ERROR,
+                            dialog = true
+                        )
+                    }
                 else
                     upsertNote()
             }
+
             is CreateNoteUiEvent.BoldText -> {
-                event.state.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.ExtraBold , fontSize = 18.sp))
+                event.state.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.ExtraBold))
             }
 
             is CreateNoteUiEvent.ItalicText -> {
@@ -75,11 +81,13 @@ class CreateNoteViewModel @Inject constructor(
             }
 
             is CreateNoteUiEvent.CloseAlertDialog -> {
-                _uiState.update { it.copy(status = CreateNoteStatus.IDLE , dialog = false) }
+                _uiState.update { it.copy(status = CreateNoteStatus.IDLE, dialog = false) }
             }
+
             is CreateNoteUiEvent.ChangeModalAI -> {
                 _uiState.update { it.copy(aiBottomSheet = event.state) }
             }
+
             is CreateNoteUiEvent.SetAIResponse -> {
                 _uiState.update { it.copy(bodyState = it.bodyState.setText(event.state)) }
             }
@@ -88,14 +96,12 @@ class CreateNoteViewModel @Inject constructor(
     }
 
 
-
-
     private fun upsertNote() {
 
         val state = _uiState.value
 
         viewModelScope.launch {
-            _uiState.update { it.copy(status = CreateNoteStatus.LOADING , message = null) }
+            _uiState.update { it.copy(status = CreateNoteStatus.LOADING, message = null) }
             if (_currentId.isBlank()) {
                 addNoteUseCase(
                     state.titleState.annotatedString.text,
@@ -103,9 +109,13 @@ class CreateNoteViewModel @Inject constructor(
                     persianDate.getShortDate(),
                     state.stateFont
                 )
-                    .onSuccess { id->
+                    .onSuccess { id ->
                         _uiState.update {
-                            it.copy(message = "ذخیره گردید" , dialog = true , status = CreateNoteStatus.SUCCESS)
+                            it.copy(
+                                message = "ذخیره گردید",
+                                dialog = true,
+                                status = CreateNoteStatus.SUCCESS
+                            )
                         }
                         _currentId = id
                     }
@@ -116,18 +126,22 @@ class CreateNoteViewModel @Inject constructor(
                     }
             } else {
 
-                    val note = Note(
-                        _currentId,
-                        title = state.titleState.annotatedString.text,
-                        body = state.bodyState.toMarkdown(),
-                        date = persianDate.getShortDate(),
-                        fontSize = state.stateFont
-                    )
+                val note = Note(
+                    _currentId,
+                    title = state.titleState.annotatedString.text,
+                    body = state.bodyState.toMarkdown(),
+                    date = persianDate.getShortDate(),
+                    fontSize = state.stateFont
+                )
 
                 updateNoteUseCase(note)
                     .onSuccess {
                         _uiState.update {
-                            it.copy(message = "ذخیره گردید" , dialog = true , status = CreateNoteStatus.SUCCESS)
+                            it.copy(
+                                message = "ذخیره گردید",
+                                dialog = true,
+                                status = CreateNoteStatus.SUCCESS
+                            )
                         }
                     }
                     .onFailure { error ->

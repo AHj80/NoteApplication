@@ -42,4 +42,7 @@ interface NoteDAO {
 
     @Query("SELECT * FROM NoteEntity WHERE synced = 0")
     suspend fun getNoteUnsynced(): List<NoteEntity>
+
+    @Query("SELECT EXISTS (SELECT 1 FROM NoteEntity WHERE synced = 0)")
+    fun getExistsUnsynced(): Flow<Boolean>
 }

@@ -46,7 +46,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +60,9 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,7 +78,9 @@ import com.ahj.noteapplication.core.common.ui.component.GlassCard
 import com.ahj.noteapplication.core.common.ui.component.SpacerHeight
 import com.ahj.noteapplication.feature.authentication.component.CustomAnimatedContent
 import com.ahj.noteapplication.feature.note.component.CustomModalGlass
+import com.ahj.noteapplication.feature.note.domain.model.NameTools
 import com.ahj.noteapplication.feature.note.domain.model.TextActions
+import com.ahj.noteapplication.feature.note.domain.model.ToolsButton
 import com.ahj.noteapplication.feature.note.domain.model.UserActionAI
 import com.ahj.noteapplication.feature.note.presentation.createNote.ai.AIStatus
 import com.ahj.noteapplication.feature.note.presentation.createNote.ai.AIUiEvent
@@ -85,8 +89,6 @@ import com.ahj.noteapplication.feature.note.presentation.createNote.create.Creat
 import com.ahj.noteapplication.feature.note.presentation.createNote.create.CreateNoteUiEvent
 import com.ahj.noteapplication.feature.note.presentation.createNote.create.CreateNoteViewModel
 import com.mohamedrejeb.richeditor.model.RichTextState
-import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.milliseconds
 
 
 @Composable
@@ -222,7 +224,8 @@ private fun TextBody(
                 singleLine = false,
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                     color = MaterialTheme.colorScheme.primary,
-                    fontSize = size.sp
+                    fontSize = size.sp,
+                    lineHeight = (size * 1.5).sp
                 ),
                 containerColor = Color.Transparent,
                 modifier = Modifier.fillParentMaxSize()
@@ -274,12 +277,23 @@ private fun ToolsCreateNote(
         )
     )
     val listIcons = listOf(
-        Icons.Default.FormatBold,
-        Icons.Default.FormatItalic,
-        Icons.Default.FormatUnderlined,
-        Icons.Default.FormatSize,
+        ToolsButton(
+            NameTools.BOLD,
+            Icons.Default.FormatBold
+        ),
+        ToolsButton(
+            NameTools.ITALIC,
+            Icons.Default.FormatItalic
+        ),
+        ToolsButton(
+            NameTools.UNDERLINE,
+            Icons.Default.FormatUnderlined,
+        ),
+        ToolsButton(
+            NameTools.FONT_SIZE,
+            Icons.Default.FormatSize,
+        ),
     )
-
 
 
     Row(
@@ -300,6 +314,7 @@ private fun ToolsCreateNote(
             colors = IconButtonDefaults.iconButtonColors(
                 containerColor = Color.Transparent,
             ),
+
             enabled = richText.annotatedString.text.isNotBlank()
         ) {
             Text(
@@ -309,19 +324,29 @@ private fun ToolsCreateNote(
             )
         }
 
-        listIcons.forEachIndexed { index, icon ->
-            IconButton({
-                when (index) {
-                    0 -> onEvent(CreateNoteUiEvent.BoldText(richText))
-                    1 -> onEvent(CreateNoteUiEvent.ItalicText(richText))
-                    2 -> onEvent(CreateNoteUiEvent.UnderlineText(richText))
-                    3 -> onEvent(CreateNoteUiEvent.SelectingFontSize(true))
+        listIcons.forEach { tools ->
+
+            val isSelected = when (tools.name) {
+                NameTools.BOLD -> richText.currentSpanStyle.fontWeight == FontWeight.ExtraBold
+                NameTools.ITALIC -> richText.currentSpanStyle.fontStyle == FontStyle.Italic
+                NameTools.UNDERLINE -> richText.currentSpanStyle.textDecoration == TextDecoration.Underline
+                NameTools.FONT_SIZE -> false
+            }
+            IconButton(
+                {
+                    when (tools.name) {
+                        NameTools.BOLD -> onEvent(CreateNoteUiEvent.BoldText(richText))
+                        NameTools.ITALIC -> onEvent(CreateNoteUiEvent.ItalicText(richText))
+                        NameTools.UNDERLINE -> onEvent(CreateNoteUiEvent.UnderlineText(richText))
+                        NameTools.FONT_SIZE -> onEvent(CreateNoteUiEvent.SelectingFontSize(true))
+                    }
+
                 }
-            }) {
+            ) {
                 Icon(
-                    icon,
-                    icon.name,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tools.icon,
+                    "${tools.name}",
+                    tint = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
                     modifier = Modifier.size(30.dp)
                 )
             }
@@ -427,7 +452,7 @@ private fun AIModalBottom(
 ) {
 
     var processAI by rememberSaveable { mutableStateOf(false) }
-    BackHandler(visibility, onBack = onDismiss)
+    BackHandler(visibility, onBack = onDismiss )
 
     val promptList = listOf(
         UserActionAI("کوتاه کردن متن", TextActions.SHORT),
@@ -457,10 +482,11 @@ private fun AIModalBottom(
             modifier = Modifier.fillMaxHeight(0.5f),
             onDismiss
         ) {
-
-            CustomAnimateVisibility(processAI) {
+            CustomAnimateVisibility(processAI, exit = fadeOut(tween(200))) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(end = 10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End
                 ) {
@@ -560,7 +586,7 @@ private fun AIResponse(
     ) {
         response?.let {
             Text(
-             it,
+                it,
                 style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Rtl),
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(10.dp)

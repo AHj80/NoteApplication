@@ -3,6 +3,7 @@ package com.ahj.noteapplication.feature.note.presentation.noteList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ahj.noteapplication.feature.note.domain.model.Note
+import com.ahj.noteapplication.feature.note.domain.repository.RepositoryNote
 import com.ahj.noteapplication.feature.note.domain.usecase.DeleteNoteUseCase
 import com.ahj.noteapplication.feature.note.domain.usecase.GetNoteDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,8 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ListNoteViewModel @Inject constructor(
     private val getNoteDataUseCase: GetNoteDataUseCase,
-    private val deleteNoteUseCase: DeleteNoteUseCase
+    private val deleteNoteUseCase: DeleteNoteUseCase,
+    private val repository: RepositoryNote
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ListNoteUiState())
@@ -64,32 +64,38 @@ class ListNoteViewModel @Inject constructor(
     }
 
 
-
     private fun getNoteData() {
         viewModelScope.launch {
-            _uiState.update { it.copy(status = ListScreenStatus.LOADING , statusMessage = null) }
+            _uiState.update { it.copy(status = ListScreenStatus.LOADING, statusMessage = null) }
             getNoteDataUseCase()
                 .catch { e ->
                     _uiState.update {
                         it.copy(
                             statusMessage = e.message,
-                            status = ListScreenStatus.ERROR
+                            status = ListScreenStatus.ERROR,
+                            isUnsynced = false
                         )
                     }
                 }
-                .collect { list ->
+                .collect { data ->
 
-                    if (list.isEmpty()) {
+                    if (data.notes.isEmpty()) {
                         _uiState.update {
                             it.copy(
-                                note = list,
+                                note = data.notes,
                                 status = ListScreenStatus.EMPTY,
-                                statusMessage = "یادداشتی وجود ندارد."
+                                statusMessage = "یادداشتی وجود ندارد.",
+                                isUnsynced = data.exists
                             )
                         }
                     } else {
                         _uiState.update {
-                            it.copy(note = list, statusMessage = null , status = ListScreenStatus.SUCCESS)
+                            it.copy(
+                                note = data.notes,
+                                statusMessage = null,
+                                status = ListScreenStatus.SUCCESS,
+                                isUnsynced = data.exists
+                            )
                         }
                     }
 

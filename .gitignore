@@ -17,13 +17,10 @@ local.properties
 *.jks
 *.keystore
 *.p12
-
+*app/release
 # فایل‌های کش اندروید استودیو
 .idea/
-/build
 .gradle/
-/app/release
 
-# فایل‌های حساس محلی
-local.properties
+
 
