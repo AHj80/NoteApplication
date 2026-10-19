@@ -9,6 +9,7 @@ sealed interface ListNoteUiEvent {
     data class IndexCurrent(val state: String) : ListNoteUiEvent
     data class Navigating(val state: String = "") : ListNoteUiEvent
 
+
     data object CloseDialog : ListNoteUiEvent
 
     data object OnDismissHoldingClick : ListNoteUiEvent

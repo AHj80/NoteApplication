@@ -1,6 +1,7 @@
 package com.ahj.noteapplication.feature.note.presentation.createNote
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -69,6 +70,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.ahj.noteapplication.app.navigation.LocalNavAnimateVisibilityScope
+import com.ahj.noteapplication.app.navigation.LocalSharedTransitionScope
 import com.ahj.noteapplication.core.common.ui.component.CreateResultScreen
 import com.ahj.noteapplication.core.common.ui.component.CreateRichTextField
 import com.ahj.noteapplication.core.common.ui.component.CustomAlertDialog
@@ -94,6 +97,7 @@ import com.mohamedrejeb.richeditor.model.RichTextState
 @Composable
 fun CreateNoteScreen(
     navController: NavController,
+    noteId: String,
     createNoteViewModel: CreateNoteViewModel = hiltViewModel(),
     aiViewModel: AIViewModel = hiltViewModel()
 ) {
@@ -101,60 +105,72 @@ fun CreateNoteScreen(
     val createUiState by createNoteViewModel.uiState.collectAsStateWithLifecycle()
     val aiUiState by aiViewModel.uiState.collectAsStateWithLifecycle()
     val createOnEvent = createNoteViewModel::onEvent
-
-
     var bottomBarHeight by remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current
+    val sharedScope = LocalSharedTransitionScope.current
+    val animateScope = LocalNavAnimateVisibilityScope.current
 
-    GlassCard(
-        corner = RoundedCornerShape(20.dp),
-        modifier = Modifier
-            .padding(vertical = 10.dp)
-            .imePadding()
-    ) {
-
-        Box {
-
-            Column {
-                TextTitle(createUiState.titleState)
-                TextBody(
-                    createUiState.bodyState,
-                    size = createUiState.stateFont,
-                    Modifier.weight(1f)
+    with(sharedScope){
+        GlassCard(
+            corner = RoundedCornerShape(20.dp),
+            modifier = Modifier
+                .padding(vertical = 10.dp)
+                .sharedElement(
+                    rememberSharedContentState(
+                        "note_$noteId"
+                    ),
+                    animateScope,
+                    boundsTransform = { _, _ -> tween(500 ) },
+                    placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize
                 )
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 10.dp),
-                    thickness = 2.dp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Column(
-                    modifier = Modifier
-                        .onGloballyPositioned { coordinates ->
-                            bottomBarHeight = with(density) { coordinates.size.height.toDp() }
+                .imePadding()
 
-                        }
-                ) {
 
-                    ToolsCreateNote(createUiState.bodyState) { createOnEvent(it) }
-                    SpacerHeight(5)
+        ) {
 
-                    BottomItem(
-                        backStack = { navController.popBackStack() }) { createOnEvent(it) }
-                }
-            }
+            Box {
 
-            CustomAnimateVisibility(
-                state = createUiState.selectingFontSize,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(bottom = bottomBarHeight)
-            ) {
-                FontItem(createUiState.fontList, createUiState.stateFont) {
-                    createOnEvent(
-                        it
+                Column {
+                    TextTitle(createUiState.titleState)
+                    TextBody(
+                        createUiState.bodyState,
+                        size = createUiState.stateFont,
+                        Modifier.weight(1f)
                     )
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp),
+                        thickness = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Column(
+                        modifier = Modifier
+                            .onGloballyPositioned { coordinates ->
+                                bottomBarHeight = with(density) { coordinates.size.height.toDp() }
+
+                            }
+                    ) {
+
+                        ToolsCreateNote(createUiState.bodyState) { createOnEvent(it) }
+                        SpacerHeight(5)
+
+                        BottomItem(
+                            backStack = { navController.popBackStack() }) { createOnEvent(it) }
+                    }
+                }
+
+                CustomAnimateVisibility(
+                    state = createUiState.selectingFontSize,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = bottomBarHeight)
+                ) {
+                    FontItem(createUiState.fontList, createUiState.stateFont) {
+                        createOnEvent(
+                            it
+                        )
+                    }
                 }
             }
         }

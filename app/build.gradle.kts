@@ -97,16 +97,9 @@ dependencies {
     // lottie
     implementation(libs.lottie.compose)
 
-    //paging
-    implementation(libs.androidx.paging.runtime.ktx)
-    implementation(libs.androidx.paging.compose)
-
     // Icons
     implementation(libs.androidx.compose.material.icons.extended)
 
-    // Coil
-    implementation(libs.coil.compose)
-    implementation(libs.coil.network)
 
     // Foundation
     implementation(libs.foundation)
@@ -124,8 +117,6 @@ dependencies {
     implementation(platform(libs.bom))
     implementation(libs.auth.kt)
 
-    // MockServer-Test
-    implementation(libs.mock.server)
 
     // TextRichEditor
     implementation(libs.richtexteditor)

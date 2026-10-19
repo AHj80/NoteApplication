@@ -2,6 +2,7 @@ package com.ahj.noteapplication.feature.note.presentation.noteList
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SyncProblem
 import androidx.compose.material3.Button
@@ -53,6 +55,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.ahj.noteapplication.app.navigation.LocalNavAnimateVisibilityScope
+import com.ahj.noteapplication.app.navigation.LocalSharedTransitionScope
 import com.ahj.noteapplication.app.navigation.Screens
 import com.ahj.noteapplication.core.common.ui.component.BackgroundScreen
 import com.ahj.noteapplication.core.common.ui.component.CreateResultScreen
@@ -73,10 +77,15 @@ fun ListNoteScreen(
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var morePanel by remember { mutableStateOf(false) }
 
 
     Scaffold(
-        topBar = { NoteTopBar(uiState.stateSearching, uiState.isUnsynced) },
+        topBar = {
+            NoteTopBar(uiState.stateSearching, uiState.isUnsynced) {
+                morePanel = !morePanel
+            }
+        },
     ) { innerPadding ->
 
 
@@ -142,10 +151,12 @@ fun ListNoteScreen(
 @Composable
 fun NoteTopBar(
     state: RichTextState,
-    isUnsynced: Boolean
+    isUnsynced: Boolean,
+    morePanel: () -> Unit
 ) {
 
     val context = LocalContext.current
+
 
     Row(
         modifier = Modifier
@@ -154,9 +165,26 @@ fun NoteTopBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
+        IconButton(
+            onClick = morePanel,
+            modifier = Modifier.size(30.dp)
+        ) {
+            Icon(
+                Icons.Default.MoreVert,
+                "More",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .padding(start = 5.dp)
+            )
+        }
+
         if (isUnsynced)
             IconButton({
-                Toast.makeText(context, "یادداشت ها به طور همگام سازی خواهند شد.", Toast.LENGTH_SHORT)
+                Toast.makeText(
+                    context,
+                    "یادداشت ها به طور خودکار همگام سازی خواهند شد.",
+                    Toast.LENGTH_SHORT
+                )
                     .show()
             }) {
                 Icon(
@@ -170,7 +198,7 @@ fun NoteTopBar(
             }
         else
             IconButton({
-                Toast.makeText(context, "یادداشت همگام سازی نشده ای وجود ندارد", Toast.LENGTH_SHORT)
+                Toast.makeText(context, "یادداشت ها همگام سازی شده اند", Toast.LENGTH_SHORT)
                     .show()
             }) {
                 Icon(
@@ -244,6 +272,8 @@ fun NoteItem(
     deleteNote: () -> Unit
 ) {
 
+    val sharedScope = LocalSharedTransitionScope.current
+    val animateScope = LocalNavAnimateVisibilityScope.current
     var state by remember { mutableStateOf(false) }
 
     Box(
@@ -255,56 +285,66 @@ fun NoteItem(
             ) { state = false },
 
         ) {
-        GlassCard(
-            corner = RoundedCornerShape(20.dp),
-            modifier = Modifier
-                .padding(vertical = 10.dp)
-                .clip(RoundedCornerShape(20.dp)),
-            glassClick = glassClick,
-            glassHolder = { state = !state }
-        ) {
+        with(sharedScope) {
+            GlassCard(
+                corner = RoundedCornerShape(20.dp),
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .sharedElement(
+                        rememberSharedContentState(
+                            "note_${note.id}"
+                        ),
+                        animateScope,
+                        boundsTransform = { _, _ -> tween(500) },
+                        placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize
+                    ),
+                glassClick = glassClick,
+                glassHolder = { state = !state }
+            ) {
 
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        Text(
+                            note.title,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontSize = 23.sp,
+                            modifier = Modifier
+                                .padding(top = 10.dp, start = 10.dp)
+                                .weight(1f),
+                            color = MaterialTheme.colorScheme.primary,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        if (!note.synced) {
+                            Icon(
+                                Icons.Default.CloudOff,
+                                "not_synced",
+                                modifier = Modifier
+                                    .padding(end = 10.dp)
+                                    .size(20.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
 
                     Text(
-                        note.title,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontSize = 23.sp,
+                        note.body.stripMarkdown(),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 13.sp),
                         modifier = Modifier
-                            .padding(top = 10.dp, start = 10.dp)
-                            .weight(1f),
+                            .padding(10.dp),
                         color = MaterialTheme.colorScheme.primary,
+                        maxLines = 10,
                         overflow = TextOverflow.Ellipsis
                     )
-                    if (!note.synced) {
-                        Icon(
-                            Icons.Default.CloudOff,
-                            "not_synced",
-                            modifier = Modifier
-                                .padding(end = 10.dp)
-                                .size(20.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
                 }
 
 
-                Text(
-                    note.body.stripMarkdown(),
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 13.sp),
-                    modifier = Modifier
-                        .padding(10.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 10,
-                    overflow = TextOverflow.Ellipsis
-                )
             }
-
-
         }
         CustomAnimateVisibility(state, Modifier.matchParentSize()) {
             HoldingItem(
