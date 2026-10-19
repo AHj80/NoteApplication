@@ -9,29 +9,28 @@ class AddNoteUseCase @Inject constructor(
     private val repositoryNote: RepositoryNote
 ) {
 
-    private val _id = UUID.randomUUID().toString()
+
     suspend operator fun invoke(
         title: String,
         body: String,
         date: String,
         fontSize: Int
-        ): Result<String> {
-
-
+    ): Result<String> {
+        val id = UUID.randomUUID().toString()
 
         return if (title.isEmpty())
             Result.failure(IllegalArgumentException("Data is Empty"))
         else
             repositoryNote.addNote(
                 Note(
-                    id = _id ,
-                    title =title,
+                    id = id,
+                    title = title,
                     body = body,
                     date = date,
                     fontSize = fontSize
                 )
             ).map {
-                _id
+                id
             }
     }
 

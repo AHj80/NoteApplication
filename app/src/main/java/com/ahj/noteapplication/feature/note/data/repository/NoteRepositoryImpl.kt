@@ -164,6 +164,8 @@ class NoteRepositoryImpl @Inject constructor(
             )
         }
 
+        if (syncingData.isFailure)
+            Log.i("ahj-worker" , syncingData.exceptionOrNull().toString())
 
         if (syncingData.isFailure) return
 
