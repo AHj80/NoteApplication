@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +29,25 @@ fun SplashScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(uiState.navigation) {
+
+        uiState.navigation?.let {
+            if (it) {
+                navController.navigate(Screens.ListNoteScreens) {
+                    popUpTo<Screens.SplashScreen> {
+                        inclusive = true
+                    }
+                }
+            } else {
+                navController.navigate(Screens.Authentication) {
+                    popUpTo<Screens.SplashScreen> {
+                        inclusive = true
+                    }
+                }
+            }
+        }
+    }
+
 
     Box(
         modifier = Modifier
@@ -42,28 +62,11 @@ fun SplashScreen(
             ),
         contentAlignment = Alignment.Center
     ) {
-        Image(
-            painter = painterResource(R.drawable.icon_result),
-            null,
-            modifier = Modifier.size(150.dp)
-        )
+            Image(
+                painter = painterResource(R.drawable.icon_result),
+                null,
+                modifier = Modifier.size(150.dp)
 
-        uiState.navigation?.let {
-            if (it)
-                navController.navigate(Screens.ListNoteScreens) {
-                    popUpTo<Screens.SplashScreen> {
-                        inclusive = true
-                    }
-                }
-            else
-                navController.navigate(Screens.Authentication) {
-                    popUpTo<Screens.SplashScreen> {
-                        inclusive = true
-                    }
-                }
-        }
+            )
     }
-
-
-
 }

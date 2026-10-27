@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,6 +28,7 @@ import com.ahj.noteapplication.core.common.ui.component.CustomAlertDialog
 import com.ahj.noteapplication.core.common.ui.component.CustomProgress
 import com.ahj.noteapplication.core.common.ui.component.GlassCard
 import com.ahj.noteapplication.core.common.ui.component.SpacerHeight
+import com.ahj.noteapplication.core.common.utils.regexEmail
 import com.ahj.noteapplication.feature.authentication.component.InsertAuthButton
 import com.ahj.noteapplication.feature.authentication.component.InsertTextFieldAuth
 
@@ -64,7 +66,7 @@ fun ForgetPassScreen(
         )
         SpacerHeight(10)
 
-        EmailVerify(uiState.stateEmail, uiState.enableOtp, uiState.emailValid) {
+        EmailVerify(uiState.stateEmail, uiState.enableOtp) {
             viewModel.onEvent(
                 it
             )
@@ -91,11 +93,12 @@ fun ForgetPassScreen(
 private fun EmailVerify(
     email: String,
     enable: Boolean,
-    valid: Boolean,
     onEvent: (ForgetPassUiEvent) -> Unit
 ) {
 
-    GlassCard {
+    GlassCard(
+        corner = RoundedCornerShape(20.dp)
+    ) {
 
         Column(
             verticalArrangement = Arrangement.Center,
@@ -111,7 +114,7 @@ private fun EmailVerify(
 
             InsertAuthButton(
                 "ارسال کد تایید",
-                !enable && valid
+                !enable && email.regexEmail()
             ) {
                 onEvent(ForgetPassUiEvent.SendOtp)
             }
@@ -129,7 +132,9 @@ private fun VerifyOtp(
     onEvent: (ForgetPassUiEvent) -> Unit
 ) {
 
-    GlassCard {
+    GlassCard(
+        corner = RoundedCornerShape(20.dp)
+    ) {
 
         Column(
             verticalArrangement = Arrangement.Center,

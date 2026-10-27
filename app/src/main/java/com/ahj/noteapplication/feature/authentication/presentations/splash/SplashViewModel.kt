@@ -1,5 +1,6 @@
 package com.ahj.noteapplication.feature.authentication.presentations.splash
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ahj.noteapplication.core.sessionManager.SessionManager
@@ -22,6 +23,7 @@ class SplashViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SplashUiState())
     val uiState: StateFlow<SplashUiState> = _uiState.asStateFlow()
 
+
     init {
         getSession()
     }
@@ -29,10 +31,9 @@ class SplashViewModel @Inject constructor(
     fun getSession() {
 
         viewModelScope.launch {
-
-            val session = sessionManager.getSessionResult()
-
             delay(2000.milliseconds)
+            Log.i("ahj_splash" , "delay")
+            val session = sessionManager.getSessionResult()
             _uiState.update {
                 it.copy(
                     navigation = session

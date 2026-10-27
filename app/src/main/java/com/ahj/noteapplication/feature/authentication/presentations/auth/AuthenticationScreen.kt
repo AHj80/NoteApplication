@@ -51,6 +51,8 @@ import com.ahj.noteapplication.core.common.ui.component.CustomAnimateVisibility
 import com.ahj.noteapplication.core.common.ui.component.CustomProgress
 import com.ahj.noteapplication.core.common.ui.component.GlassCard
 import com.ahj.noteapplication.core.common.ui.component.SpacerHeight
+import com.ahj.noteapplication.core.common.utils.regexEmail
+import com.ahj.noteapplication.core.common.utils.regexPass
 import com.ahj.noteapplication.feature.authentication.component.CustomAnimatedContent
 import com.ahj.noteapplication.feature.authentication.component.InsertAuthButton
 import com.ahj.noteapplication.feature.authentication.component.InsertTextFieldAuth
@@ -119,25 +121,22 @@ fun AuthenticationScreen(
                     Login(
                         uiState.stateEmail,
                         uiState.statePass,
-                        uiState.visualTransform,
-                        viewModel.validatingLogin(),
-                        { event ->
-                            if (event is AuthenticationUiEvent.ForgetPass) {
-                                navController.navigate(Screens.ForgetPassword) {
-                                    popUpTo<Screens.ForgetPassword> { inclusive = true }
-                                }
-                            } else viewModel.onEvent(event)
-                        }
-                    )
+                        uiState.visualTransform
+
+                    ) { event ->
+                        if (event is AuthenticationUiEvent.ForgetPass) {
+                            navController.navigate(Screens.ForgetPassword) {
+                                popUpTo<Screens.ForgetPassword> { inclusive = true }
+                            }
+                        } else viewModel.onEvent(event)
+                    }
                 } else {
                     Register(
                         uiState.stateEmail,
                         uiState.statePass,
                         uiState.statePassConfirm,
-                        viewModel.validatingRegister(),
-                        uiState.visualTransform,
-                        { onEvent(it) }
-                    )
+                        uiState.visualTransform
+                    ) { onEvent(it) }
 
 
                 }
@@ -169,11 +168,11 @@ private fun Register(
     email: String,
     pass: String,
     passConfirm: String,
-    enabled: Boolean,
     visualTransform: Boolean,
     onEvent: (AuthenticationUiEvent) -> Unit
 ) {
 
+    val regex = email.regexEmail() && pass.regexPass() && passConfirm.regexPass() && pass == passConfirm
 
     GlassCard(corner = RoundedCornerShape(20.dp)) {
 
@@ -253,7 +252,7 @@ private fun Register(
             )
             SpacerHeight(30)
 
-            InsertAuthButton("ثبت نام", enabled = enabled) {
+            InsertAuthButton("ثبت نام", enabled = regex) {
                 onEvent(AuthenticationUiEvent.Register)
             }
             SpacerHeight(20)
@@ -269,9 +268,11 @@ private fun Login(
     email: String,
     pass: String,
     transform: Boolean,
-    enabled: Boolean,
+
     onEvent: (AuthenticationUiEvent) -> Unit
 ) {
+
+    val regex = email.regexEmail() && pass.regexPass()
 
     GlassCard(corner = RoundedCornerShape(20.dp)) {
         Column(
@@ -335,7 +336,7 @@ private fun Login(
                 )
             }
 
-            InsertAuthButton("ورود", enabled = enabled) {
+            InsertAuthButton("ورود", enabled = regex) {
                 onEvent(AuthenticationUiEvent.Login)
             }
             SpacerHeight(20)

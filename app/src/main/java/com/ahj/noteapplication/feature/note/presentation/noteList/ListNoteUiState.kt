@@ -12,11 +12,13 @@ data class ListNoteUiState(
     val windowHolding: Boolean = false,
     val selectedNote: String? = null,
     val stateDialog: Boolean = false,
-    val isUnsynced: Boolean = false
+    val isUnsynced: Boolean = false,
+    val userEmail: String = ""
 ) {
 
     val searchNote: List<Note>
         get() {
+
             val searchQuery = stateSearching.annotatedString.text
             return if (searchQuery.isBlank())
                 note

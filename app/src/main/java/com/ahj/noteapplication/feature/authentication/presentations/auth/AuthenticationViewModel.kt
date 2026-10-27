@@ -122,35 +122,5 @@ class AuthenticationViewModel @Inject constructor(
 
     }
 
-    fun validatingLogin(): Boolean {
-        val inputEmail = _uiState.value.stateEmail
-        val inputPass = _uiState.value.statePass
-
-        val email =
-            inputEmail.length > 9 && inputEmail.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(
-                inputEmail
-            ).matches()
-        val pass =
-            inputPass.length >= 8 && inputPass.isNotBlank() && inputPass.any { it.isUpperCase() }
-        return email && pass
-    }
-
-
-    fun validatingRegister(): Boolean {
-        val inputEmail = _uiState.value.stateEmail
-        val inputPass = _uiState.value.statePass
-        val inputPassConfirm = _uiState.value.statePassConfirm
-        val email =
-            Patterns.EMAIL_ADDRESS.matcher(inputEmail).matches() && inputEmail.isNotBlank()
-        val passMatch =
-            inputPass == inputPassConfirm
-                    && inputPass.isNotBlank()
-                    && inputPassConfirm.isNotBlank()
-                    && inputPass.length >= 8
-                    && inputPass.any { it.isUpperCase() }
-
-        return email && passMatch
-    }
-
 
 }

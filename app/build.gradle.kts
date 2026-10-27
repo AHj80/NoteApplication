@@ -17,7 +17,7 @@ android {
         minSdk = 24
         targetSdk = 37
         versionCode = 1
-        versionName = "1.1"
+        versionName = "2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         val properties = Properties()
@@ -34,7 +34,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -125,5 +126,10 @@ dependencies {
     implementation(libs.workmanager)
     implementation(libs.hilt.work)
     ksp(libs.androidx.hilt.compiler)
+
+    //proguard
+    implementation(libs.concurrent.ktx)
+    implementation(libs.concurrent.features)
+    implementation(libs.errorprone.annotations)
 
 }

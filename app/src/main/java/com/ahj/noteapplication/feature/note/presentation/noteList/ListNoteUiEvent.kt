@@ -11,6 +11,8 @@ sealed interface ListNoteUiEvent {
 
 
     data object CloseDialog : ListNoteUiEvent
-
+    data object ChangePassNavigate: ListNoteUiEvent
+    data object OnDismissMenu: ListNoteUiEvent
     data object OnDismissHoldingClick : ListNoteUiEvent
+    data object Logout : ListNoteUiEvent
 }

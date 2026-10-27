@@ -1,6 +1,5 @@
 package com.ahj.noteapplication.feature.authentication.presentations.forgetPass
 
-import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ahj.noteapplication.feature.authentication.domain.model.VerifyOtpModel
@@ -15,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @HiltViewModel
@@ -35,7 +35,8 @@ class ForgetPassViewModel @Inject constructor(
             }
 
             is ForgetPassUiEvent.ChangeStateOtp -> {
-                _uiState.update { it.copy(stateOtp = onEvent.state) }
+                val text = onEvent.state.filter { it.isDigit() }.take(8)
+                _uiState.update { it.copy(stateOtp = text) }
             }
 
             is ForgetPassUiEvent.SendOtp -> sendOtp()
@@ -108,7 +109,7 @@ class ForgetPassViewModel @Inject constructor(
         _job?.cancel()
         _job = viewModelScope.launch {
             for (i in 59 downTo 0) {
-                delay(1000)
+                delay(1000.milliseconds)
                 _uiState.update { it.copy(timer = i) }
             }
             _uiState.update { it.copy(enableOtp = false) }

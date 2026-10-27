@@ -20,15 +20,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SyncProblem
+import androidx.compose.material.icons.sharp.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -38,6 +42,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,13 +63,14 @@ import androidx.navigation.NavController
 import com.ahj.noteapplication.app.navigation.LocalNavAnimateVisibilityScope
 import com.ahj.noteapplication.app.navigation.LocalSharedTransitionScope
 import com.ahj.noteapplication.app.navigation.Screens
-import com.ahj.noteapplication.core.common.ui.component.BackgroundScreen
 import com.ahj.noteapplication.core.common.ui.component.CreateResultScreen
 import com.ahj.noteapplication.core.common.ui.component.CreateRichTextField
 import com.ahj.noteapplication.core.common.ui.component.CustomAlertDialog
 import com.ahj.noteapplication.core.common.ui.component.CustomAnimateVisibility
 import com.ahj.noteapplication.core.common.ui.component.CustomProgress
 import com.ahj.noteapplication.core.common.ui.component.GlassCard
+import com.ahj.noteapplication.core.common.ui.component.SpacerHeight
+import com.ahj.noteapplication.core.common.utils.openUrl
 import com.ahj.noteapplication.core.common.utils.stripMarkdown
 import com.ahj.noteapplication.feature.note.domain.model.Note
 import com.mohamedrejeb.richeditor.model.RichTextState
@@ -76,25 +83,29 @@ fun ListNoteScreen(
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var stateMenu by remember { mutableStateOf(false) }
 
 
 
     Scaffold(
         topBar = {
-            NoteTopBar(uiState.stateSearching, uiState.isUnsynced)
+            NoteTopBar(uiState.stateSearching, uiState.isUnsynced, stateMenu) {
+                stateMenu = !stateMenu
+            }
         },
+        containerColor = Color.Transparent
     ) { innerPadding ->
 
-
-        BackgroundScreen(paddingValues = PaddingValues(top = innerPadding.calculateTopPadding())) {
-
-            AnimatedContent(
-                targetState = uiState.listStatusScreen,
-                transitionSpec = {
-                    fadeIn(animationSpec = tween(delayMillis = 500)) togetherWith
-                            fadeOut(animationSpec = tween(delayMillis = 500))
-                }
-            ) { status ->
+        AnimatedContent(
+            targetState = uiState.listStatusScreen,
+            transitionSpec = {
+                fadeIn(animationSpec = tween(delayMillis = 500)) togetherWith
+                        fadeOut(animationSpec = tween(delayMillis = 500))
+            }
+        ) { status ->
+            Column(
+                modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
+            ) {
                 when (status) {
 
                     ListScreenStatus.EMPTY -> {
@@ -127,32 +138,60 @@ fun ListNoteScreen(
 
                 }
             }
+        }
 
-            BottomBar {
-                if (it is ListNoteUiEvent.Navigating) {
-                    navController.navigate(Screens.CreateScreen(it.state))
-                }
+        BottomBar {
+            if (it is ListNoteUiEvent.Navigating) {
+                navController.navigate(Screens.CreateScreen(it.state))
             }
         }
 
-        CustomAlertDialog(uiState.message, uiState.stateDialog) {
-            viewModel.onEvent(ListNoteUiEvent.CloseDialog)
+        CustomAnimateVisibility(stateMenu, enter = fadeIn(tween(150))) {
+            MoreMenu(uiState.userEmail , innerPadding) { event ->
+                when (event) {
+                    is ListNoteUiEvent.ChangePassNavigate -> {
+                        navController.navigate(Screens.ChangePassScreen) {
+                            popUpTo<Screens.ListNoteScreens> {
+                                saveState = true
+                            }
+                        }
+                    }
+                    is ListNoteUiEvent.Logout -> {
+                        viewModel.onEvent(event)
+                        navController.navigate(Screens.Authentication){
+                            popUpTo<Screens.ListNoteScreens> {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    }
+
+                    else -> {
+                        stateMenu = false
+                    }
+
+                }
+            }
         }
+    }
 
-
+    CustomAlertDialog(uiState.message, uiState.stateDialog) {
+        viewModel.onEvent(ListNoteUiEvent.CloseDialog)
     }
 
 
 }
 
+
 @Composable
 fun NoteTopBar(
     state: RichTextState,
-    isUnsynced: Boolean
+    isUnsynced: Boolean,
+    stateMenu: Boolean,
+    menuClick: () -> Unit
 ) {
 
     val context = LocalContext.current
-
 
     Row(
         modifier = Modifier
@@ -162,6 +201,27 @@ fun NoteTopBar(
         horizontalArrangement = Arrangement.Center
     ) {
 
+        IconButton(
+            menuClick,
+            modifier = Modifier.width(25.dp)
+        ) {
+            if (stateMenu)
+                Icon(
+                    Icons.Sharp.Close,
+                    "Close",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .size(30.dp)
+                )
+            else
+                Icon(
+                    Icons.Default.MoreVert,
+                    "Menu",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .size(30.dp)
+                )
+        }
 
         if (isUnsynced)
             IconButton({
@@ -169,15 +229,13 @@ fun NoteTopBar(
                     context,
                     "یادداشت ها به طور خودکار همگام سازی خواهند شد.",
                     Toast.LENGTH_SHORT
-                )
-                    .show()
+                ).show()
             }) {
                 Icon(
                     Icons.Default.SyncProblem,
                     "Unsynced",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
-                        .padding(horizontal = 5.dp)
                         .size(30.dp)
                 )
             }
@@ -191,7 +249,7 @@ fun NoteTopBar(
                     "Synced",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
-                        .padding(horizontal = 5.dp)
+
                         .size(30.dp)
                 )
             }
@@ -200,7 +258,7 @@ fun NoteTopBar(
 
         CreateRichTextField(
             state = state,
-            "جست و جو بر اساس عنوان...",
+            "جستجو بر اساس عنوان...",
             leadingIcon = {
                 Icon(Icons.Default.Search, null, tint = MaterialTheme.colorScheme.primary)
             },
@@ -220,14 +278,13 @@ fun SampleNotes(
     onEvent: (ListNoteUiEvent) -> Unit
 ) {
 
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        items(item.size, { item[it].id }) {
-
-            val note = item[it]
+        items(items = item, { note -> note.id }) { note ->
 
             NoteItem(
                 note,
@@ -430,3 +487,91 @@ private fun HoldingItem(
 }
 
 
+@Composable
+fun MoreMenu(
+    userEmail: String,
+    paddingValues: PaddingValues,
+    onEvent: (ListNoteUiEvent) -> Unit
+) {
+
+    val context = LocalContext.current
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) { onEvent(ListNoteUiEvent.OnDismissMenu) },
+        contentAlignment = Alignment.TopStart
+    ) {
+        Box(
+            modifier = Modifier.clickable(enabled = false) {}
+        ) {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
+                elevation = CardDefaults.cardElevation(7.dp),
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .padding(horizontal = 10.dp)
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(10.dp)
+                ) {
+                    Card(
+                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text(
+                            userEmail,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(10.dp),
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontSize = 10.sp
+                        )
+                    }
+                    SpacerHeight(10)
+
+                    TextButton(
+                        {
+                            onEvent(ListNoteUiEvent.ChangePassNavigate)
+                        }) {
+                        Text(
+                            "تغییر رمز عبور",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color =  MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    SpacerHeight(10)
+
+                    TextButton(
+                        {
+                            context.openUrl(
+                                "https://t.me/AHj80",
+                                "org.telegram.messenger"
+                            )
+                        }) {
+                        Text(
+                            "ارتباط با توسعه دهنده",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color =  MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    SpacerHeight(10)
+
+                    TextButton(
+                        {
+                            onEvent(ListNoteUiEvent.Logout)
+                        }) {
+                        Text(
+                            "خروج ",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.Red
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+}

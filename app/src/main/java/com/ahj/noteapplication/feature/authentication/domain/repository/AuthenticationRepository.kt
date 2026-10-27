@@ -1,8 +1,9 @@
 package com.ahj.noteapplication.feature.authentication.domain.repository
 
+import com.ahj.noteapplication.feature.authentication.domain.model.ChangePassword
 import com.ahj.noteapplication.feature.authentication.domain.model.LoginModel
-import com.ahj.noteapplication.feature.authentication.domain.model.UserModel
 import com.ahj.noteapplication.feature.authentication.domain.model.RegisterModel
+import com.ahj.noteapplication.feature.authentication.domain.model.UserModel
 import com.ahj.noteapplication.feature.authentication.domain.model.VerifyOtpModel
 
 
@@ -19,5 +20,7 @@ interface AuthenticationRepository {
     suspend fun sendResetPassOtp(emailAddress: String): Result<Boolean>
 
     suspend fun verifyResetPassOtp(requestModel : VerifyOtpModel): Result<UserModel>
+
+    suspend fun changePass(changePass: ChangePassword): Result<Unit>
 
 }

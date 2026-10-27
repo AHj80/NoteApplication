@@ -20,7 +20,7 @@ fun InsertAuthButton(
 ) {
     Button(
         { onClick() },
-        modifier = Modifier
+        modifier = modifier
 
             .shadow(
                 10.dp,
@@ -33,10 +33,10 @@ fun InsertAuthButton(
         ) {
         Text(
             text,
+            modifier = Modifier,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.secondary,
-            fontSize = 12.sp,
-            modifier = modifier
+            fontSize = 12.sp
         )
     }
 }

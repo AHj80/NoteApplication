@@ -22,4 +22,7 @@ sealed class Screens {
     @Serializable
     data class CreateScreen(val id: String) : Screens()
 
+    @Serializable
+    data object ChangePassScreen: Screens()
+
 }

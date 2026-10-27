@@ -56,6 +56,12 @@ class SafeHelper @Inject constructor() {
                         "user_already_exists" ->
                             Exception("این ایمیل قبلاً ثبت‌ نام شده است.")
 
+                        "current_password_required" ->
+                            Exception("رمز فعلی وارد شده اشتباه میباشد")
+
+                        "otp_expired" ->
+                            Exception("کد تایید منقضی شده است")
+
                         else -> Exception("خطا از سمت سرور: ${e.error}")
                     }
                 }

@@ -2,11 +2,14 @@ package com.ahj.noteapplication.feature.note.presentation.noteList
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ahj.noteapplication.core.common.utils.DispatcherIO
+import com.ahj.noteapplication.core.sessionManager.SessionManager
 import com.ahj.noteapplication.feature.note.domain.model.Note
 import com.ahj.noteapplication.feature.note.domain.repository.RepositoryNote
 import com.ahj.noteapplication.feature.note.domain.usecase.DeleteNoteUseCase
 import com.ahj.noteapplication.feature.note.domain.usecase.GetNoteDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +22,9 @@ import javax.inject.Inject
 class ListNoteViewModel @Inject constructor(
     private val getNoteDataUseCase: GetNoteDataUseCase,
     private val deleteNoteUseCase: DeleteNoteUseCase,
-    private val repository: RepositoryNote
+    private val sessionManager: SessionManager,
+    private val repositoryNote: RepositoryNote,
+    @DispatcherIO private val dispatcherIO: CoroutineDispatcher
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ListNoteUiState())
@@ -57,6 +62,7 @@ class ListNoteViewModel @Inject constructor(
                 _uiState.update { it.copy(stateDialog = false) }
             }
 
+            is ListNoteUiEvent.Logout -> logout()
 
             else -> {}
         }
@@ -85,7 +91,8 @@ class ListNoteViewModel @Inject constructor(
                                 note = data.notes,
                                 status = ListScreenStatus.EMPTY,
                                 statusMessage = "یادداشتی وجود ندارد.",
-                                isUnsynced = data.exists
+                                isUnsynced = data.exists,
+                                userEmail = sessionManager.userEmail()
                             )
                         }
                     } else {
@@ -94,7 +101,8 @@ class ListNoteViewModel @Inject constructor(
                                 note = data.notes,
                                 statusMessage = null,
                                 status = ListScreenStatus.SUCCESS,
-                                isUnsynced = data.exists
+                                isUnsynced = data.exists,
+                                userEmail = sessionManager.userEmail()
                             )
                         }
                     }
@@ -111,6 +119,12 @@ class ListNoteViewModel @Inject constructor(
             val delete = deleteNoteUseCase(note)
             if (delete)
                 _uiState.update { it.copy(stateDialog = true, message = "با موفقیت حذف گردید") }
+        }
+    }
+
+    private fun logout() {
+        viewModelScope.launch(dispatcherIO) {
+            repositoryNote.logout()
         }
     }
 

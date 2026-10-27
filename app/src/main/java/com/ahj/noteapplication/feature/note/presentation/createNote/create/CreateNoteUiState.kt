@@ -10,6 +10,7 @@ data class CreateNoteUiState(
     val fontList: List<Int> = listOf(16, 20, 26, 32),
     val stateFont: Int = 16,
     val selectingFontSize: Boolean = false,
-    val dialog : Boolean = false,
-    val aiBottomSheet: Boolean = false
+    val dialog: Boolean = false,
+    val aiBottomSheet: Boolean = false,
+    val currentId: String = ""
 )

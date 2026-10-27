@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.ahj.noteapplication.feature.authentication.component.InsertAuthButton
 
@@ -56,8 +57,9 @@ fun CustomAlertDialog(text: String?, state: Boolean, onDismiss: () -> Unit) {
                             it,
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier
-                                .padding(horizontal = 20.dp),
-                            color = MaterialTheme.colorScheme.primary
+                                .padding(horizontal = 15.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.Center
                         )
                     }
 

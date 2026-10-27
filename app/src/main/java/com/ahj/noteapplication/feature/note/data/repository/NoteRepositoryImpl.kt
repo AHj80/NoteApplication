@@ -1,7 +1,9 @@
 package com.ahj.noteapplication.feature.note.data.repository
 
 import android.util.Log
+import androidx.room.RoomDatabase
 import com.ahj.noteapplication.core.common.utils.SafeHelper
+import com.ahj.noteapplication.core.database.MyDatabase
 import com.ahj.noteapplication.core.sessionManager.SessionManager
 import com.ahj.noteapplication.feature.note.data.local.db.DAO.NoteDAO
 import com.ahj.noteapplication.feature.note.data.local.remote.NoteApiService
@@ -23,7 +25,8 @@ class NoteRepositoryImpl @Inject constructor(
     private val api: NoteApiService,
     private val safeHelper: SafeHelper,
     private val worker: NoteWorkerScheduler,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val database: MyDatabase
 ) : RepositoryNote {
 
 
@@ -31,7 +34,7 @@ class NoteRepositoryImpl @Inject constructor(
 
         val insertRoom = safeHelper.safeDatabase {
             noteDAO.upsertNote(
-                note.toEntity(false, sessionManager.getUserId)
+                note.toEntity(false, sessionManager.getUserId())
             )
         }
 
@@ -40,7 +43,7 @@ class NoteRepositoryImpl @Inject constructor(
         }
 
         val networkSync = safeHelper.safeNetwork {
-            api.insertNote(note.toDto(sessionManager.getUserId))
+            api.insertNote(note.toDto(sessionManager.getUserId()))
         }
 
         if (networkSync.isSuccess) {
@@ -100,7 +103,7 @@ class NoteRepositoryImpl @Inject constructor(
             noteDAO.upsertNote(
                 note.toEntity(
                     false,
-                    sessionManager.getUserId
+                    sessionManager.getUserId()
                 )
             )
         }
@@ -112,7 +115,7 @@ class NoteRepositoryImpl @Inject constructor(
         val networkSync =
             safeHelper.safeNetwork {
                 api.insertNote(
-                    note.toDto(sessionManager.getUserId)
+                    note.toDto(sessionManager.getUserId())
                 )
             }
 
@@ -164,9 +167,6 @@ class NoteRepositoryImpl @Inject constructor(
             )
         }
 
-        if (syncingData.isFailure)
-            Log.i("ahj-worker" , syncingData.exceptionOrNull().toString())
-
         if (syncingData.isFailure) return
 
         safeHelper.safeDatabase {
@@ -184,6 +184,15 @@ class NoteRepositoryImpl @Inject constructor(
 
     override fun getExistsUnsynced(): Flow<Boolean> {
         return noteDAO.getExistsUnsynced()
+    }
+
+    override suspend fun logout() {
+        try {
+            sessionManager.deleteSession()
+            database.clearAllTables()
+        }catch (e: Exception){
+            Log.e("ERROR_LOGOUT",e.message.toString())
+        }
     }
 
 

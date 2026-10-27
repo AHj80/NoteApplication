@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -97,7 +98,6 @@ import com.mohamedrejeb.richeditor.model.RichTextState
 @Composable
 fun CreateNoteScreen(
     navController: NavController,
-    noteId: String,
     createNoteViewModel: CreateNoteViewModel = hiltViewModel(),
     aiViewModel: AIViewModel = hiltViewModel()
 ) {
@@ -114,10 +114,10 @@ fun CreateNoteScreen(
         GlassCard(
             corner = RoundedCornerShape(20.dp),
             modifier = Modifier
-                .padding(vertical = 10.dp)
+                .navigationBarsPadding()
                 .sharedElement(
                     rememberSharedContentState(
-                        "note_$noteId"
+                        "note_${createUiState.currentId}"
                     ),
                     animateScope,
                     boundsTransform = { _, _ -> tween(500 ) },
@@ -284,13 +284,20 @@ private fun ToolsCreateNote(
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val isNotBlankText = richText.annotatedString.text.isNotBlank()
 
     val aiColor = Brush.linearGradient(
-        listOf(
-            Color(0xFF0B2AF5),
-            Color(0xFFEC4899),
-            Color(0xFF8B5CF6)
-        )
+        if (isNotBlankText)
+            listOf(
+                Color(0xFF0B2AF5),
+                Color(0xFFEC4899),
+                Color(0xFF8B5CF6)
+            )
+        else
+            listOf(
+                Color.Gray,
+                Color.Gray
+            )
     )
     val listIcons = listOf(
         ToolsButton(
@@ -317,6 +324,7 @@ private fun ToolsCreateNote(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
+
         IconButton(
             {
                 focusManager.clearFocus()

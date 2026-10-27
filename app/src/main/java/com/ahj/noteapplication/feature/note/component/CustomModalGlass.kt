@@ -55,7 +55,6 @@ fun CustomModalGlass(
                 shape = RoundedCornerShape(topStart = 40.dp, 40.dp),
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(0.dp)
                     .clip(RoundedCornerShape(topStart = 40.dp, 40.dp)),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.9f),

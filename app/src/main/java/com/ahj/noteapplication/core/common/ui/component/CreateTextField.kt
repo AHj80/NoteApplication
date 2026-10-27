@@ -11,7 +11,6 @@ import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,7 +37,7 @@ fun CreateTextField(
     placeholder: String? = null,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
-    isPasswordVisible: Boolean = true, // اگر false باشد، متن مخفی (Password) می‌شود
+    isPasswordVisible: Boolean = true,
     singleLine: Boolean = true,
     readOnly: Boolean = false,
     placeholderSize: Int = 16,
@@ -135,7 +134,7 @@ fun CreateTextField(
 
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun CreateRichTextField(
     state: RichTextState,

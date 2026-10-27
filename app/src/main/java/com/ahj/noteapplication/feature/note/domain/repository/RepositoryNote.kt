@@ -9,7 +9,7 @@ interface RepositoryNote {
 
     fun getNoteData(): Flow<List<Note>>
 
-    suspend fun getNoteById(id: String) : Note?
+    suspend fun getNoteById(id: String): Note?
 
     suspend fun deleteNote(note: Note): Boolean
 
@@ -24,6 +24,10 @@ interface RepositoryNote {
     suspend fun textPrompt(prompt: String): Result<String>
 
     fun getExistsUnsynced(): Flow<Boolean>
+
+    suspend fun logout()
+
+
 
 
 }

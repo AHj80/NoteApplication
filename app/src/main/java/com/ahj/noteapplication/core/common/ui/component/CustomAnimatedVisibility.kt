@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -30,4 +31,25 @@ fun CustomAnimateVisibility(
         content(transition)
 
     }
+}
+
+@Composable
+fun CustomAnimateVisibility(
+    state: MutableTransitionState<Boolean>,
+    modifier: Modifier = Modifier,
+    enter: EnterTransition = fadeIn(tween(600)),
+    exit: ExitTransition = fadeOut(animationSpec = tween(600)),
+    content: @Composable AnimatedVisibilityScope.(Transition<EnterExitState>) -> Unit
+) {
+
+    AnimatedVisibility(
+        visibleState = state,
+        modifier = modifier,
+        enter = enter,
+        exit = exit,
+    ) {
+        content(transition)
+
+    }
+
 }

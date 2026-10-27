@@ -43,7 +43,7 @@ fun NoteDto.toEntity(): NoteEntity =
         body = this.body,
         date = this.date,
         fontSize = this.font,
-        userId = this.userId?:"",
+        userId = this.userId,
         synced = true
     )
 

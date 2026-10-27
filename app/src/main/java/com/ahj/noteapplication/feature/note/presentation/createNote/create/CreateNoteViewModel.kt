@@ -35,10 +35,13 @@ class CreateNoteViewModel @Inject constructor(
     val uiState: StateFlow<CreateNoteUiState> = _uiState.asStateFlow()
     private val _args = savedStateHandle.toRoute<Screens.CreateScreen>()
 
-    private var _currentId: String = _args.id
 
     init {
-        getNoteById()
+        _uiState.update { it.copy(currentId = _args.id) }
+
+        if (_args.id.isNotBlank()){
+            getNoteById(_args.id)
+        }
     }
 
 
@@ -102,7 +105,7 @@ class CreateNoteViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.update { it.copy(status = CreateNoteStatus.LOADING, message = null) }
-            if (_currentId.isBlank()) {
+            if (_args.id.isBlank()) {
                 addNoteUseCase(
                     state.titleState.annotatedString.text,
                     state.bodyState.toMarkdown(),
@@ -114,10 +117,10 @@ class CreateNoteViewModel @Inject constructor(
                             it.copy(
                                 message = "ذخیره گردید",
                                 dialog = true,
-                                status = CreateNoteStatus.SUCCESS
+                                status = CreateNoteStatus.SUCCESS,
+                                currentId = id
                             )
                         }
-                        _currentId = id
                     }
                     .onFailure { error ->
                         _uiState.update {
@@ -126,8 +129,9 @@ class CreateNoteViewModel @Inject constructor(
                     }
             } else {
 
+
                 val note = Note(
-                    _currentId,
+                    id = state.currentId,
                     title = state.titleState.annotatedString.text,
                     body = state.bodyState.toMarkdown(),
                     date = persianDate.getShortDate(),
@@ -154,10 +158,11 @@ class CreateNoteViewModel @Inject constructor(
 
     }
 
-    private fun getNoteById() {
+    private fun getNoteById(id: String) {
+
         viewModelScope.launch {
-            if (_args.id.isNotBlank())
-                getNoteByIdUseCase(_currentId)?.let { note ->
+            if (id.isNotBlank())
+                getNoteByIdUseCase(id)?.let { note ->
 
                     _uiState.update {
                         it.copy(

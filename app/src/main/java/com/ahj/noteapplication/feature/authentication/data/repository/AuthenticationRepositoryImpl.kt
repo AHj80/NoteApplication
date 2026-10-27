@@ -2,6 +2,7 @@ package com.ahj.noteapplication.feature.authentication.data.repository
 
 import com.ahj.noteapplication.core.common.utils.SafeHelper
 import com.ahj.noteapplication.feature.authentication.data.mapper.toDomain
+import com.ahj.noteapplication.feature.authentication.domain.model.ChangePassword
 import com.ahj.noteapplication.feature.authentication.domain.model.LoginModel
 import com.ahj.noteapplication.feature.authentication.domain.model.RegisterModel
 import com.ahj.noteapplication.feature.authentication.domain.model.UserModel
@@ -18,7 +19,6 @@ import javax.inject.Inject
 class AuthenticationRepositoryImpl @Inject constructor(
     private val supabaseAuth: Auth,
     private val safeHelper: SafeHelper
-
 ) : AuthenticationRepository {
 
     override suspend fun login(requestModel: LoginModel): Result<UserModel> =
@@ -64,8 +64,8 @@ class AuthenticationRepositoryImpl @Inject constructor(
 
     override suspend fun sendResetPassOtp(emailAddress: String): Result<Boolean> =
         safeHelper.authenticationHandler {
-            supabaseAuth.signInWith(OTP){
-                email= emailAddress
+            supabaseAuth.signInWith(OTP) {
+                email = emailAddress
             }
             true
         }
@@ -80,13 +80,21 @@ class AuthenticationRepositoryImpl @Inject constructor(
             checkUserData(supabaseAuth.currentUserOrNull())
         }
 
-
-
     private fun checkUserData(user: UserInfo?): UserModel {
         val user = checkNotNull(user) {
             "حساب کاربری یافت نشد"
         }
-
         return user.toDomain()
     }
+
+
+    override suspend fun changePass(changePass: ChangePassword): Result<Unit> =
+
+        safeHelper.authenticationHandler {
+            supabaseAuth.updateUser {
+                currentPassword = changePass.currentPass
+                password = changePass.newPassword
+            }
+        }
+
 }

@@ -1,8 +1,11 @@
 package com.ahj.noteapplication.core.common.utils
 
 import android.content.Context
+import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.util.Patterns
+import androidx.core.net.toUri
 
 
 fun Context.networkManager(): Boolean {
@@ -30,3 +33,31 @@ fun String.stripMarkdown(): String {
         .trim()
 }
 
+fun String.regexPass(): Boolean {
+
+    val regex =
+        this.isNotBlank() && this.any { it.isUpperCase()  } && this.any { it.isLowerCase() } && this.any { it.isDigit() } && this.length >= 8
+    return regex
+}
+
+fun Context.openUrl(url: String, packageName: String? = null) {
+    try {
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
+            packageName?.let { setPackage(it) }
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        startActivity(intent)
+    } catch (e: Exception) {
+        val fallbackIntent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        startActivity(fallbackIntent)
+    }
+}
+
+fun String.regexEmail(): Boolean{
+    val regex = this.length > 9 && this.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(
+        this
+    ).matches()
+    return regex
+}
