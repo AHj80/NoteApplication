@@ -186,7 +186,7 @@ private val enterTransition = slideInVertically(
 
 // خروج از صفحه (Exit)
 private val exitTransition = slideOutVertically(
-    targetOffsetY = { fullHeight -> -fullHeight / 4 }, 
+    targetOffsetY = { fullHeight -> -fullHeight / 4 },
     animationSpec = tween(
         durationMillis = TRANSITION_DURATION,
         easing = FastOutSlowInEasing
