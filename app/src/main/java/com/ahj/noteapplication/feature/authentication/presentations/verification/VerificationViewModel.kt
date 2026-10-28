@@ -1,5 +1,6 @@
 package com.ahj.noteapplication.feature.authentication.presentations.verification
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @HiltViewModel
@@ -36,7 +38,29 @@ class VerificationViewModel @Inject constructor(
     }
 
 
-    fun verificationOtp() {
+    fun onEvent(event: VerificationUiEvent) {
+
+        when (event) {
+
+            is VerificationUiEvent.ChangeOTPState -> {
+                _uiState.update { it.copy(stateOtp = event.state.filter { otp-> otp.isDigit() }.take(8)) }
+            }
+
+            is VerificationUiEvent.OnDismiss -> {
+                _uiState.update { it.copy(status = VerificationStatus.IDELE, alert = false) }
+            }
+
+            is VerificationUiEvent.ResendOtp -> resendOtp()
+
+
+            is VerificationUiEvent.ConfirmClick -> verificationOtp()
+
+        }
+
+    }
+
+
+   private fun verificationOtp() {
 
         val verifyRequest = VerifyOtpModel(_args.email, _uiState.value.stateOtp)
 
@@ -66,10 +90,7 @@ class VerificationViewModel @Inject constructor(
     }
 
 
-    fun changeStateOtp(state: String) = _uiState.update { it.copy(stateOtp = state) }
-
-
-    fun resendOtp() {
+    private fun resendOtp() {
 
         viewModelScope.launch {
             _uiState.update {
@@ -78,12 +99,13 @@ class VerificationViewModel @Inject constructor(
                     message = null
                 )
             }
+            Log.i("ahj_resend",_args.email)
             resendOtpUseCase(_args.email)
                 .onSuccess {
 
                     _uiState.update {
                         it.copy(
-                            message = "کد با موفقیت به آدرس :  ارسال گردید",
+                            message = "کد تایید با موفقیت به آدرس ${_args.email} ارسال گردید",
                             status = VerificationStatus.IDELE,
                             alert = true
                         )
@@ -102,20 +124,11 @@ class VerificationViewModel @Inject constructor(
         }
     }
 
-    fun onDismiss() {
-        _uiState.update { it.copy(status = VerificationStatus.IDELE, alert = false) }
-    }
-
-    fun validating(): Boolean {
-        val state = _uiState.value
-        return state.stateOtp.isNotBlank() && state.stateOtp.length == 8
-    }
-
     private fun timer() {
 
         viewModelScope.launch {
             for (i in 59 downTo 0) {
-                delay(1000)
+                delay(1000.milliseconds)
                 _uiState.update { it.copy(timer = i) }
 
             }

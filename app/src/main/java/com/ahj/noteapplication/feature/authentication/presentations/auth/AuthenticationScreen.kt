@@ -72,8 +72,9 @@ fun AuthenticationScreen(
             AuthenticationStatus.SUCCESS_REGISTER ->{
 
                     navController.navigate(Screens.VerificationScreen(uiState.stateEmail)) {
-                        popUpTo<Screens.Authentication> {
+                        popUpTo<Screens.SplashScreen> {
                             inclusive = true
+
                         }
                     }
 

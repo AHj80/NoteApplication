@@ -359,7 +359,9 @@ fun NoteItem(
                                 .padding(top = 10.dp, start = 10.dp)
                                 .weight(1f),
                             color = MaterialTheme.colorScheme.primary,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+
                         )
                         if (!note.synced) {
                             Icon(

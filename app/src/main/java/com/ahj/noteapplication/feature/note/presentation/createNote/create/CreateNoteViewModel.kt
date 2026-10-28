@@ -104,8 +104,8 @@ class CreateNoteViewModel @Inject constructor(
         val state = _uiState.value
 
         viewModelScope.launch {
-            _uiState.update { it.copy(status = CreateNoteStatus.LOADING, message = null) }
-            if (_args.id.isBlank()) {
+            _uiState.update { it.copy(status = CreateNoteStatus.LOADING, message = null , currentId = _args.id) }
+            if (state.currentId.isBlank()) {
                 addNoteUseCase(
                     state.titleState.annotatedString.text,
                     state.bodyState.toMarkdown(),

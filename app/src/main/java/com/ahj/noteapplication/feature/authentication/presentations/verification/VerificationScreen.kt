@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -15,6 +15,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
@@ -40,6 +41,8 @@ fun VerificationScreen(
 
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val onEvent = viewModel::onEvent
+
     LaunchedEffect(uiState.status) {
         if (uiState.status == VerificationStatus.SUCCESS) {
             navController.navigate(Screens.ListNoteScreens) {
@@ -58,12 +61,8 @@ fun VerificationScreen(
 
         ScreenItems(
             uiState.stateOtp,
-            viewModel.validating(),
             uiState.timer,
-            { viewModel.changeStateOtp(it) },
-            { viewModel.verificationOtp() },
-            { viewModel.resendOtp() }
-        )
+        ) { onEvent(it) }
 
 
     }
@@ -74,9 +73,9 @@ fun VerificationScreen(
     }
 
     CustomAlertDialog(
-        uiState.message,uiState.alert
+        uiState.message, uiState.alert
     ) {
-        viewModel.onDismiss()
+        onEvent(VerificationUiEvent.OnDismiss)
     }
 
 
@@ -85,32 +84,32 @@ fun VerificationScreen(
 @Composable
 private fun ScreenItems(
     otp: String,
-    enabled: Boolean,
     time: Int,
-    changeOtp: (String) -> Unit,
-    confirmClick: () -> Unit,
-    resendClick: () -> Unit
-
+    onEvent:(VerificationUiEvent)-> Unit
 ) {
+
+    val validateEnabled = otp.isNotBlank() && otp.length == 8
 
     InsertTextFieldAuth(
         otp,
-        { changeOtp(it) },
+        { onEvent(VerificationUiEvent.ChangeOTPState(it)) },
         "کد تایید را وارد نمایید",
         keyboardType = KeyboardType.Number
     )
     SpacerHeight(10)
 
     Row(
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
     ) {
 
-        InsertAuthButton("تایید", enabled) {
-            confirmClick()
+        InsertAuthButton("تایید", enabled = validateEnabled) {
+            onEvent(VerificationUiEvent.ConfirmClick)
         }
 
         TextButton({
-            resendClick()
+            onEvent(VerificationUiEvent.ResendOtp)
         }, enabled = time == 0) {
             Text(
                 "ارسال مجدد کد",
@@ -122,18 +121,16 @@ private fun ScreenItems(
 
         Card(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
-            modifier = Modifier.size(height = 50.dp, width = 70.dp)
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+
             ) {
+
                 Text(
                     "00:$time",
                     style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(10.dp)
+                    modifier = Modifier.padding(vertical = 10.dp, horizontal = 15.dp),
+                    color = MaterialTheme.colorScheme.secondary
                 )
-            }
+
         }
     }
 
