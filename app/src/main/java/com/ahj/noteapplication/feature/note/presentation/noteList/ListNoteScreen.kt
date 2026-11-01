@@ -44,6 +44,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,8 +54,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -147,7 +151,7 @@ fun ListNoteScreen(
         }
 
         CustomAnimateVisibility(stateMenu, enter = fadeIn(tween(150))) {
-            MoreMenu(uiState.userEmail , innerPadding) { event ->
+            MoreMenu(uiState.userEmail, innerPadding) { event ->
                 when (event) {
                     is ListNoteUiEvent.ChangePassNavigate -> {
                         navController.navigate(Screens.ChangePassScreen) {
@@ -156,9 +160,10 @@ fun ListNoteScreen(
                             }
                         }
                     }
+
                     is ListNoteUiEvent.Logout -> {
                         viewModel.onEvent(event)
-                        navController.navigate(Screens.Authentication){
+                        navController.navigate(Screens.Authentication) {
                             popUpTo<Screens.ListNoteScreens> {
                                 inclusive = true
                             }
@@ -376,15 +381,20 @@ fun NoteItem(
                     }
 
 
-                    Text(
-                        note.body.stripMarkdown(),
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 13.sp),
-                        modifier = Modifier
-                            .padding(10.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        maxLines = 10,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                        Text(
+                            note.body.stripMarkdown(),
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontSize = 13.sp,
+                                textDirection = TextDirection.Content
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(10.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 10,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
 
 
@@ -541,7 +551,7 @@ fun MoreMenu(
                         Text(
                             "تغییر رمز عبور",
                             style = MaterialTheme.typography.bodyLarge,
-                            color =  MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                     SpacerHeight(10)
@@ -556,7 +566,7 @@ fun MoreMenu(
                         Text(
                             "ارتباط با توسعه دهنده",
                             style = MaterialTheme.typography.bodyLarge,
-                            color =  MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                     SpacerHeight(10)

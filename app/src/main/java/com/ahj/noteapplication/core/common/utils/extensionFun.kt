@@ -36,7 +36,7 @@ fun String.stripMarkdown(): String {
 fun String.regexPass(): Boolean {
 
     val regex =
-        this.isNotBlank() && this.any { it.isUpperCase()  } && this.any { it.isLowerCase() } && this.any { it.isDigit() } && this.length >= 8
+        this.isNotBlank() && this.any { it.isUpperCase() } && this.any { it.isLowerCase() } && this.any { it.isDigit() } && this.length >= 8
     return regex
 }
 
@@ -55,7 +55,7 @@ fun Context.openUrl(url: String, packageName: String? = null) {
     }
 }
 
-fun String.regexEmail(): Boolean{
+fun String.regexEmail(): Boolean {
     val regex = this.length > 9 && this.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(
         this
     ).matches()

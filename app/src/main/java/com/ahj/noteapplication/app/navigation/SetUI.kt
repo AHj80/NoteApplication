@@ -63,7 +63,8 @@ fun SetUi(
     }
 
 
-    Scaffold { innerPadding ->
+    Scaffold{ innerPadding ->
+
 
 
         SharedTransitionLayout {

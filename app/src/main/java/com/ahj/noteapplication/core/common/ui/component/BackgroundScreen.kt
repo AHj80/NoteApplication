@@ -16,7 +16,7 @@ import com.ahj.noteapplication.R
 @Composable
 fun BackgroundScreen(
     modifier: Modifier = Modifier,
-    paddingValues: PaddingValues  ,
+    paddingValues: PaddingValues ,
     content: @Composable () -> Unit
 ) {
 

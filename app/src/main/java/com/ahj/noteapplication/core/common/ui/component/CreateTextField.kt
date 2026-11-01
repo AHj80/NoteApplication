@@ -2,6 +2,7 @@ package com.ahj.noteapplication.core.common.ui.component
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -17,15 +18,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mohamedrejeb.richeditor.model.RichTextState
@@ -107,7 +111,7 @@ fun CreateTextField(
                 interactionSource = interactionSource,
                 isError = isError,
                 placeholder = {
-                    if (placeholder !=null){
+                    if (placeholder != null) {
                         Text(
                             text = placeholder,
                             style = MaterialTheme.typography.bodyLarge,
@@ -131,8 +135,6 @@ fun CreateTextField(
         }
     )
 }
-
-
 
 
 @Composable
@@ -170,53 +172,53 @@ fun CreateRichTextField(
     ),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
-    val mergeStyle = LocalTextStyle.current.merge(textStyle)
-    val textDigit = state.annotatedString.text.trim().firstOrNull()?.let {
-            char ->
-        char in '0'..'9' || char in '۰'..'۹'
-    } ?: false
-    val textDirection = if (textDigit) TextDirection.Ltr else TextDirection.Rtl
 
-    BasicRichTextEditor(
-        state = state,
-        modifier = modifier.padding(paddingValue),
-        enabled = enabled,
-        readOnly = readOnly,
-        textStyle = mergeStyle.copy(textDirection = textDirection),
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        singleLine = singleLine,
-        interactionSource = interactionSource,
-        decorationBox = { innerTextField ->
-            TextFieldDefaults.DecorationBox(
-                value = state.toText(), // مقدار متنی ساده جهت تشخیص خالی بودن برای Placeholder
-                innerTextField = innerTextField,
-                enabled = enabled,
-                singleLine = singleLine,
-                visualTransformation = VisualTransformation.None,
-                interactionSource = interactionSource,
-                isError = isError,
-                placeholder = {
-                    if (state.annotatedString.text.isBlank()) {
-                        Text(
-                            text = placeholder,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontSize = placeholderSize.sp,
-                            textAlign = textAlign,
-                            color = Color.Gray
-                        )
-                    }
-                },
-                leadingIcon = leadingIcon,
-                trailingIcon = trailingIcon,
-                shape = shape,
-                colors = colors,
-                contentPadding = PaddingValues(
-                    start = 15.dp,
-                    end = 15.dp,
-                    top = 12.dp,
-                    bottom = 12.dp
+    val mergeStyle = LocalTextStyle.current.merge(textStyle)
+
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        BasicRichTextEditor(
+            state = state,
+            modifier = modifier.padding(paddingValue),
+            enabled = enabled,
+            readOnly = readOnly,
+            textStyle = mergeStyle,
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            singleLine = singleLine,
+            interactionSource = interactionSource,
+            decorationBox = { innerTextField ->
+                TextFieldDefaults.DecorationBox(
+                    value = state.toText(), // مقدار متنی ساده جهت تشخیص خالی بودن برای Placeholder
+                    innerTextField = innerTextField,
+                    enabled = enabled,
+                    singleLine = singleLine,
+                    visualTransformation = VisualTransformation.None,
+                    interactionSource = interactionSource,
+                    isError = isError,
+                    placeholder = {
+                        if (state.annotatedString.text.isBlank()) {
+                            Text(
+                                text = placeholder,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontSize = placeholderSize.sp,
+                                textAlign = TextAlign.Right,
+                                color = Color.Gray,
+                                modifier= Modifier.fillMaxWidth()
+
+                            )
+                        }
+                    },
+                    leadingIcon = leadingIcon,
+                    trailingIcon = trailingIcon,
+                    shape = shape,
+                    colors = colors,
+                    contentPadding = PaddingValues(
+                        start = 15.dp,
+                        end = 15.dp,
+                        top = 12.dp,
+                        bottom = 12.dp
+                    )
                 )
-            )
-        }
-    )
+            }
+        )
+    }
 }
