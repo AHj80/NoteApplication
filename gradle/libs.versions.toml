@@ -120,6 +120,8 @@ test-mockk = { module = "io.mockk:mockk", version = "1.13.10" }
 test-turbine = { module = "app.cash.turbine:turbine", version = "1.1.0" }
 test-truth = { module = "com.google.truth:truth", version = "1.4.2" }
 
+# biometric
+biometric = { group = "androidx.biometric" , name = "biometric" , version = "1.1.0" }
 
 
 [plugins]

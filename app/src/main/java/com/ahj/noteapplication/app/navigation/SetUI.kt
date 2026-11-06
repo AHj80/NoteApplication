@@ -63,8 +63,7 @@ fun SetUi(
     }
 
 
-    Scaffold{ innerPadding ->
-
+    Scaffold { innerPadding ->
 
 
         SharedTransitionLayout {
@@ -132,7 +131,7 @@ fun SetUi(
                             LocalNavAnimateVisibilityScope provides this,
                         ) {
 
-                            BackgroundScreen(paddingValues = innerPadding) {
+                            BackgroundScreen() {
                                 ListNoteScreen(navController)
                             }
 

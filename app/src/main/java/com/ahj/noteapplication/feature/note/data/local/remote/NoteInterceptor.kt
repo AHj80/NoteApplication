@@ -2,7 +2,7 @@ package com.ahj.noteapplication.feature.note.data.local.remote
 
 import com.ahj.noteapplication.BuildConfig
 import com.ahj.noteapplication.core.common.utils.Upsert
-import com.ahj.noteapplication.core.sessionManager.SessionManager
+import com.ahj.noteapplication.core.dataStore.SessionManager
 import okhttp3.Interceptor
 import okhttp3.Response
 import retrofit2.Invocation

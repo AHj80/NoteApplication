@@ -2,7 +2,7 @@ package com.ahj.noteapplication.app.base
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ahj.noteapplication.core.sessionManager.SessionManager
+import com.ahj.noteapplication.core.dataStore.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.channels.Channel

@@ -115,6 +115,7 @@ fun CreateNoteScreen(
             corner = RoundedCornerShape(20.dp),
             modifier = Modifier
                 .navigationBarsPadding()
+                .padding(bottom = 5.dp)
                 .sharedElement(
                     rememberSharedContentState(
                         "note_${createUiState.currentId}"
@@ -230,6 +231,7 @@ private fun TextBody(
     LazyColumn(
         modifier = modifier
             .fillMaxWidth()
+
     ) {
 
         item {

@@ -8,6 +8,7 @@ sealed interface ListNoteUiEvent {
     data class DeleteNote(val note: Note) : ListNoteUiEvent
     data class IndexCurrent(val state: String) : ListNoteUiEvent
     data class Navigating(val state: String = "") : ListNoteUiEvent
+    data class BiometricChange(val state: Boolean) : ListNoteUiEvent
 
 
     data object CloseDialog : ListNoteUiEvent

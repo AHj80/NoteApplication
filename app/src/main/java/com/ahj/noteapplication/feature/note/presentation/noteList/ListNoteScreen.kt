@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -29,29 +29,33 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SyncProblem
-import androidx.compose.material.icons.sharp.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -76,8 +80,10 @@ import com.ahj.noteapplication.core.common.ui.component.GlassCard
 import com.ahj.noteapplication.core.common.ui.component.SpacerHeight
 import com.ahj.noteapplication.core.common.utils.openUrl
 import com.ahj.noteapplication.core.common.utils.stripMarkdown
+import com.ahj.noteapplication.feature.note.component.NavigationDrawer
 import com.ahj.noteapplication.feature.note.domain.model.Note
 import com.mohamedrejeb.richeditor.model.RichTextState
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -87,98 +93,125 @@ fun ListNoteScreen(
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var stateMenu by remember { mutableStateOf(false) }
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
 
 
 
-    Scaffold(
-        topBar = {
-            NoteTopBar(uiState.stateSearching, uiState.isUnsynced, stateMenu) {
-                stateMenu = !stateMenu
-            }
-        },
-        containerColor = Color.Transparent
-    ) { innerPadding ->
-
-        AnimatedContent(
-            targetState = uiState.listStatusScreen,
-            transitionSpec = {
-                fadeIn(animationSpec = tween(delayMillis = 500)) togetherWith
-                        fadeOut(animationSpec = tween(delayMillis = 500))
-            }
-        ) { status ->
-            Column(
-                modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
-            ) {
-                when (status) {
-
-                    ListScreenStatus.EMPTY -> {
-                        CreateResultScreen(uiState.statusMessage)
-                    }
-
-
-                    ListScreenStatus.ERROR -> {
-                        CreateResultScreen(uiState.statusMessage)
-                    }
-
-                    ListScreenStatus.NOTE_FOUND -> {
-                        CreateResultScreen("یادداشتی یافت نشد!")
-                    }
-
-                    ListScreenStatus.LOADING -> {
-                        CustomProgress()
-                    }
-
-                    else -> {
-                        SampleNotes(
-                            uiState.searchNote
-                        ) { event ->
-                            if (event is ListNoteUiEvent.Navigating)
-                                navController.navigate(Screens.CreateScreen(event.state))
-                            else viewModel.onEvent(event)
+    NavigationDrawer(
+        drawerState = drawerState,
+        uiState.biometric,
+        uiState.userEmail,
+        onEvent = { event ->
+            when (event) {
+                is ListNoteUiEvent.ChangePassNavigate -> {
+                    navController.navigate(Screens.ChangePassScreen) {
+                        popUpTo<Screens.ListNoteScreens> {
+                            saveState = true
                         }
                     }
-
-
                 }
+
+                is ListNoteUiEvent.Logout -> {
+                    viewModel.onEvent(event)
+                    navController.navigate(Screens.Authentication) {
+                        popUpTo<Screens.ListNoteScreens> {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                }
+
+                else -> {viewModel.onEvent(event)}
             }
         }
+    ) {
+        Scaffold(
+            topBar = {
+                 NoteTopBar(uiState.stateSearching, uiState.isUnsynced, drawerState)
+            },
+            containerColor = Color.Transparent,
+            modifier = Modifier.systemBarsPadding()
+        ) { innerPadding ->
+            AnimatedContent(
+                targetState = uiState.listStatusScreen,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(delayMillis = 500)) togetherWith
+                            fadeOut(animationSpec = tween(delayMillis = 500))
+                }
+            ) { status ->
+                Column(
+                    modifier = Modifier.padding(innerPadding)
+                ) {
+                    when (status) {
 
-        BottomBar {
-            if (it is ListNoteUiEvent.Navigating) {
-                navController.navigate(Screens.CreateScreen(it.state))
-            }
-        }
+                        ListScreenStatus.EMPTY -> {
+                            CreateResultScreen(uiState.statusMessage)
+                        }
 
-        CustomAnimateVisibility(stateMenu, enter = fadeIn(tween(150))) {
-            MoreMenu(uiState.userEmail, innerPadding) { event ->
-                when (event) {
-                    is ListNoteUiEvent.ChangePassNavigate -> {
-                        navController.navigate(Screens.ChangePassScreen) {
-                            popUpTo<Screens.ListNoteScreens> {
-                                saveState = true
+
+                        ListScreenStatus.ERROR -> {
+                            CreateResultScreen(uiState.statusMessage)
+                        }
+
+                        ListScreenStatus.NOTE_FOUND -> {
+                            CreateResultScreen("یادداشتی یافت نشد!")
+                        }
+
+                        ListScreenStatus.LOADING -> {
+                            CustomProgress()
+                        }
+
+                        else -> {
+                            SampleNotes(
+                                uiState.searchNote
+                            ) { event ->
+                                if (event is ListNoteUiEvent.Navigating)
+                                    navController.navigate(Screens.CreateScreen(event.state))
+                                else viewModel.onEvent(event)
                             }
                         }
-                    }
 
-                    is ListNoteUiEvent.Logout -> {
-                        viewModel.onEvent(event)
-                        navController.navigate(Screens.Authentication) {
-                            popUpTo<Screens.ListNoteScreens> {
-                                inclusive = true
-                            }
-                            launchSingleTop = true
-                        }
-                    }
 
-                    else -> {
-                        stateMenu = false
                     }
-
                 }
             }
+
+            BottomBar {
+                if (it is ListNoteUiEvent.Navigating) {
+                    navController.navigate(Screens.CreateScreen(it.state))
+                }
+            }
+
+            /* CustomAnimateVisibility(stateMenu, enter = fadeIn(tween(150))) {
+                 MoreMenu(uiState.userEmail, innerPadding) { event ->
+                     when (event) {
+                         is ListNoteUiEvent.ChangePassNavigate -> {
+                             navController.navigate(Screens.ChangePassScreen) {
+                                 popUpTo<Screens.ListNoteScreens> {
+                                     saveState = true
+                                 }
+                             }
+                         }
+
+                         is ListNoteUiEvent.Logout -> {
+                             viewModel.onEvent(event)
+                             navController.navigate(Screens.Authentication) {
+                                 popUpTo<Screens.ListNoteScreens> {
+                                     inclusive = true
+                                 }
+                                 launchSingleTop = true
+                             }
+                         }
+
+                         else -> {
+                             stateMenu = false
+                         }
+     */
         }
     }
+
+
+
 
     CustomAlertDialog(uiState.message, uiState.stateDialog) {
         viewModel.onEvent(ListNoteUiEvent.CloseDialog)
@@ -192,40 +225,32 @@ fun ListNoteScreen(
 fun NoteTopBar(
     state: RichTextState,
     isUnsynced: Boolean,
-    stateMenu: Boolean,
-    menuClick: () -> Unit
+    drawerState: DrawerState
 ) {
 
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(5.dp),
+            .padding(horizontal = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
 
         IconButton(
-            menuClick,
-            modifier = Modifier.width(25.dp)
+            {
+                scope.launch { drawerState.open() }
+            },
         ) {
-            if (stateMenu)
-                Icon(
-                    Icons.Sharp.Close,
-                    "Close",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .size(30.dp)
-                )
-            else
-                Icon(
-                    Icons.Default.MoreVert,
-                    "Menu",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .size(30.dp)
-                )
+            Icon(
+                Icons.Default.Menu,
+                "Close",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.scale(1.2f)
+
+            )
         }
 
         if (isUnsynced)
@@ -241,7 +266,7 @@ fun NoteTopBar(
                     "Unsynced",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
-                        .size(30.dp)
+                        .scale(1.2f)
                 )
             }
         else
@@ -254,8 +279,7 @@ fun NoteTopBar(
                     "Synced",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
-
-                        .size(30.dp)
+                        .scale(1.2f)
                 )
             }
 
@@ -267,7 +291,10 @@ fun NoteTopBar(
             leadingIcon = {
                 Icon(Icons.Default.Search, null, tint = MaterialTheme.colorScheme.primary)
             },
-            textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.primary),
+            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                color = MaterialTheme.colorScheme.primary,
+                textDirection = TextDirection.Rtl
+            ),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -388,7 +415,8 @@ fun NoteItem(
                                 fontSize = 13.sp,
                                 textDirection = TextDirection.Content
                             ),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
                                 .padding(10.dp),
                             color = MaterialTheme.colorScheme.primary,
                             maxLines = 10,

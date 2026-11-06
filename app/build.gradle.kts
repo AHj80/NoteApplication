@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.ahj.noteapplication"
-        minSdk = 24
+        minSdk = 28
         targetSdk = 37
         versionCode = 1
         versionName = "2.1"
@@ -130,6 +130,9 @@ dependencies {
     implementation(libs.concurrent.ktx)
     implementation(libs.concurrent.features)
     implementation(libs.errorprone.annotations)
+
+    //biometric
+    implementation(libs.biometric)
 
 
     //Unit test

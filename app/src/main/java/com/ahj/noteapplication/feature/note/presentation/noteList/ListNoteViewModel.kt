@@ -1,9 +1,10 @@
 package com.ahj.noteapplication.feature.note.presentation.noteList
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ahj.noteapplication.core.common.utils.DispatcherIO
-import com.ahj.noteapplication.core.sessionManager.SessionManager
+import com.ahj.noteapplication.core.dataStore.SessionManager
 import com.ahj.noteapplication.feature.note.domain.model.Note
 import com.ahj.noteapplication.feature.note.domain.repository.RepositoryNote
 import com.ahj.noteapplication.feature.note.domain.usecase.DeleteNoteUseCase
@@ -22,8 +23,8 @@ import javax.inject.Inject
 class ListNoteViewModel @Inject constructor(
     private val getNoteDataUseCase: GetNoteDataUseCase,
     private val deleteNoteUseCase: DeleteNoteUseCase,
-    private val sessionManager: SessionManager,
     private val repositoryNote: RepositoryNote,
+    private val sessionManager: SessionManager,
     @DispatcherIO private val dispatcherIO: CoroutineDispatcher
 ) : ViewModel() {
 
@@ -64,6 +65,10 @@ class ListNoteViewModel @Inject constructor(
 
             is ListNoteUiEvent.Logout -> logout()
 
+            is ListNoteUiEvent.BiometricChange -> validatingBiometric(event.state)
+
+
+
             else -> {}
         }
 
@@ -84,7 +89,6 @@ class ListNoteViewModel @Inject constructor(
                     }
                 }
                 .collect { data ->
-
                     if (data.notes.isEmpty()) {
                         _uiState.update {
                             it.copy(
@@ -92,7 +96,8 @@ class ListNoteViewModel @Inject constructor(
                                 status = ListScreenStatus.EMPTY,
                                 statusMessage = "یادداشتی وجود ندارد.",
                                 isUnsynced = data.exists,
-                                userEmail = sessionManager.userEmail()
+                                userEmail = data.email,
+                                biometric = data.biometric
                             )
                         }
                     } else {
@@ -102,7 +107,8 @@ class ListNoteViewModel @Inject constructor(
                                 statusMessage = null,
                                 status = ListScreenStatus.SUCCESS,
                                 isUnsynced = data.exists,
-                                userEmail = sessionManager.userEmail()
+                                userEmail = data.email,
+                                biometric = data.biometric
                             )
                         }
                     }
@@ -121,6 +127,14 @@ class ListNoteViewModel @Inject constructor(
                 _uiState.update { it.copy(stateDialog = true, message = "با موفقیت حذف گردید") }
         }
     }
+
+
+    private fun validatingBiometric(state: Boolean){
+        viewModelScope.launch {
+                sessionManager.changeBiometricEnabled(state)
+        }
+    }
+
 
     private fun logout() {
         viewModelScope.launch(dispatcherIO) {

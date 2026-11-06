@@ -13,7 +13,8 @@ data class ListNoteUiState(
     val selectedNote: String? = null,
     val stateDialog: Boolean = false,
     val isUnsynced: Boolean = false,
-    val userEmail: String = ""
+    val userEmail: String = "",
+    val biometric: Boolean = false
 ) {
 
     val searchNote: List<Note>

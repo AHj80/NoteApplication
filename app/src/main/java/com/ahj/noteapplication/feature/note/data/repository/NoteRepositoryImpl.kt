@@ -1,10 +1,9 @@
 package com.ahj.noteapplication.feature.note.data.repository
 
 import android.util.Log
-import androidx.room.RoomDatabase
 import com.ahj.noteapplication.core.common.utils.SafeHelper
 import com.ahj.noteapplication.core.database.MyDatabase
-import com.ahj.noteapplication.core.sessionManager.SessionManager
+import com.ahj.noteapplication.core.dataStore.SessionManager
 import com.ahj.noteapplication.feature.note.data.local.db.DAO.NoteDAO
 import com.ahj.noteapplication.feature.note.data.local.remote.NoteApiService
 import com.ahj.noteapplication.feature.note.data.local.remote.dto.AIRequestDto

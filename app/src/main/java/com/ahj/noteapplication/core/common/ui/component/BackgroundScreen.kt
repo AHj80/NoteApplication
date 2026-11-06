@@ -10,13 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import com.ahj.noteapplication.R
 
 @Composable
 fun BackgroundScreen(
     modifier: Modifier = Modifier,
-    paddingValues: PaddingValues ,
+    paddingValues: PaddingValues = PaddingValues(),
     content: @Composable () -> Unit
 ) {
 

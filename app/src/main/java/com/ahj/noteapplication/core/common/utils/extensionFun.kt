@@ -1,11 +1,13 @@
 package com.ahj.noteapplication.core.common.utils
 
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Patterns
 import androidx.core.net.toUri
+import androidx.fragment.app.FragmentActivity
 
 
 fun Context.networkManager(): Boolean {
@@ -61,3 +63,4 @@ fun String.regexEmail(): Boolean {
     ).matches()
     return regex
 }
+
