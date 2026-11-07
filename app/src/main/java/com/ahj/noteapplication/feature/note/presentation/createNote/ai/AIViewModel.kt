@@ -45,10 +45,11 @@ class AIViewModel @Inject constructor(
                         )
                     }
                     val stringBuilder = StringBuilder()
-                    result.forEach { char ->
-                        val response = stringBuilder.append(char).toString()
+                    val words = result.split(" ")
+                    words.forEach { word ->
+                        val response = stringBuilder.append("$word ").toString()
                         _uiState.update { it.copy(aiResponse = response) }
-                        delay(20.milliseconds)
+                        delay(70.milliseconds)
 
                     }
 

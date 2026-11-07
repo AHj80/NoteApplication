@@ -8,7 +8,6 @@ import androidx.fragment.app.FragmentActivity
 fun biometricHelper(
     activity: FragmentActivity,
     title: String,
-    subtitle: String,
     onSuccess: () -> Unit,
     onFailure: (String) -> Unit
 ) {
@@ -73,7 +72,6 @@ fun biometricHelper(
     // تنظیمات ظاهر دیالوگ بیومتریک
     val promptInfo = BiometricPrompt.PromptInfo.Builder()
         .setTitle(title)
-        .setSubtitle(subtitle)
         .setAllowedAuthenticators(authenticators)
         .build()
 

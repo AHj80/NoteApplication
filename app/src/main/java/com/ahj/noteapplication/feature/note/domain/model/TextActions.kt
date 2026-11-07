@@ -4,5 +4,6 @@ enum class TextActions {
     SHORT,
     TRANSLATE,
     LONG,
-    PROCESS_MATH
+    PROCESS_MATH,
+    RECIPE
 }

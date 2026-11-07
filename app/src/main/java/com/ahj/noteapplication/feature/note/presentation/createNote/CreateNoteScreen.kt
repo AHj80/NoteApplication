@@ -110,7 +110,8 @@ fun CreateNoteScreen(
     val sharedScope = LocalSharedTransitionScope.current
     val animateScope = LocalNavAnimateVisibilityScope.current
 
-    with(sharedScope){
+
+    with(sharedScope) {
         GlassCard(
             corner = RoundedCornerShape(20.dp),
             modifier = Modifier
@@ -121,7 +122,7 @@ fun CreateNoteScreen(
                         "note_${createUiState.currentId}"
                     ),
                     animateScope,
-                    boundsTransform = { _, _ -> tween(500 ) },
+                    boundsTransform = { _, _ -> tween(500) },
                     placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize
                 )
                 .imePadding()
@@ -442,6 +443,8 @@ private fun BottomItem(
     onEvent: (CreateNoteUiEvent) -> Unit
 ) {
 
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -454,14 +457,21 @@ private fun BottomItem(
             MaterialTheme.colorScheme.primary,
             textColor = MaterialTheme.colorScheme.secondary,
             enabled = enabled
-        ) { onEvent(CreateNoteUiEvent.SaveNote) }
+        ) {
+            onEvent(CreateNoteUiEvent.SaveNote)
+            keyboardController?.hide()
+            focusManager.clearFocus()
+        }
 
         InsertNoteAction(
             "برگشت",
             Color.Transparent,
             textColor = MaterialTheme.colorScheme.primary,
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-        ) { backStack() }
+        ) {
+            backStack()
+            keyboardController?.hide()
+        }
     }
 }
 
@@ -478,13 +488,15 @@ private fun AIModalBottom(
 ) {
 
     var processAI by rememberSaveable { mutableStateOf(false) }
-    BackHandler(visibility, onBack = onDismiss )
+    BackHandler(visibility, onBack = onDismiss)
 
     val promptList = listOf(
         UserActionAI("کوتاه کردن متن", TextActions.SHORT),
         UserActionAI("گسترش متن", TextActions.LONG),
         UserActionAI("ترجمه متن", TextActions.TRANSLATE),
-        UserActionAI("حل مسئله ریاضی", TextActions.PROCESS_MATH)
+        UserActionAI("حل مسئله ریاضی", TextActions.PROCESS_MATH),
+        UserActionAI("دستور آشپزی", TextActions.RECIPE),
+
     )
 
 
@@ -499,13 +511,15 @@ private fun AIModalBottom(
         ),
         exit = slideOutVertically(
             targetOffsetY = { fullHeight -> fullHeight }, // خروج به سمت پایین صفحه
-            animationSpec = tween(durationMillis = 400)
+            animationSpec = tween(durationMillis = 200)
         ) + fadeOut(
-            animationSpec = tween(durationMillis = 300)
+            animationSpec = tween(durationMillis = 150)
         )
     ) {
         CustomModalGlass(
-            modifier = Modifier.fillMaxHeight(0.5f),
+            modifier = Modifier
+                .fillMaxHeight(0.5f)
+                .navigationBarsPadding(),
             onDismiss
         ) {
             CustomAnimateVisibility(processAI, exit = fadeOut(tween(200))) {

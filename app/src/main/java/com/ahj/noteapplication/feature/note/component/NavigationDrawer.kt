@@ -150,7 +150,6 @@ fun NavigationDrawer(
                                         biometricHelper(
                                             activity,
                                             "ورود با اثر انگشت",
-                                            "",
                                             {
                                                 onEvent(ListNoteUiEvent.BiometricChange(checkChange))
                                             },

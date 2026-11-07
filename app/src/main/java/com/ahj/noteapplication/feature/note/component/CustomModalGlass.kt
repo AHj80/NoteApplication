@@ -1,7 +1,12 @@
 package com.ahj.noteapplication.feature.note.component
 
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,9 +26,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.ahj.noteapplication.core.common.ui.component.SpacerHeight
 
+enum class DragValue {
+    Expanded, // حالت باز
+    Dismissed // حالت بسته
+}
 
 @Composable
 fun CustomModalGlass(
@@ -32,6 +43,15 @@ fun CustomModalGlass(
     content: @Composable () -> Unit
 ) {
 
+    val state = remember {
+        AnchoredDraggableState(
+            initialValue = DragValue.Expanded,
+            anchors = DraggableAnchors {
+                DragValue.Expanded at 0f          // موقعیت اولیه
+                DragValue.Dismissed at 1000f      // موقعیت بسته شدن (انتهای صفحه)
+            },
+        )
+    }
 
     Box(
         modifier = Modifier
@@ -66,6 +86,10 @@ fun CustomModalGlass(
                 ) {
                     HorizontalDivider(
                         modifier = Modifier
+                            .anchoredDraggable(
+                                state = state,
+                                orientation = Orientation.Vertical
+                            )
                             .clip(CircleShape)
                             .width(50.dp),
                         thickness = 7.dp,

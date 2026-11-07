@@ -9,6 +9,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,20 +29,42 @@ class SplashViewModel @Inject constructor(
         getSession()
     }
 
-    fun getSession() {
+    fun onEvent(event: SplashUiEvent) {
+        when (event) {
+            is SplashUiEvent.NavigatingHandled -> _uiState.update {
+                it.copy(navigation = null)
+            }
+        }
+
+
+    }
+
+    private fun getSession() {
 
         viewModelScope.launch {
             delay(2000.milliseconds)
-            Log.i("ahj_splash" , "delay")
             val session = sessionManager.getSessionResult()
-            _uiState.update {
-                it.copy(
-                    navigation = session
-                )
+            val biometric = sessionManager.biometricEnable.first()
+            if (biometric) {
+                _uiState.update {
+                    it.copy(
+                        navigation = session,
+                        status = SplashStatus.BIOMETRIC
+                    )
+                }
+            } else {
+                _uiState.update {
+                    it.copy(
+                        navigation = session,
+                        status = SplashStatus.NON_BIOMETRIC
+                    )
+                }
             }
 
 
         }
 
     }
+
+
 }

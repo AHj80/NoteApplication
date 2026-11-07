@@ -1,6 +1,5 @@
 package com.ahj.noteapplication.feature.note.presentation.noteList
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ahj.noteapplication.core.common.utils.DispatcherIO
