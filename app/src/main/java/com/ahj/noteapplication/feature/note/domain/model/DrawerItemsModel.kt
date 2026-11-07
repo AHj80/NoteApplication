@@ -9,5 +9,6 @@ data class DrawerItemsModel(
 enum class DrawerItems {
     CHANGE_PASS,
     CONTACTS,
+    UPDATE,
     LOGOUT
 }

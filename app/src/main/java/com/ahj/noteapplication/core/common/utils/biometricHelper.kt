@@ -13,7 +13,7 @@ fun biometricHelper(
     onFailure: (String) -> Unit
 ) {
     val biometricManager = BiometricManager.from(activity)
-    val authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG
+    val authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
 
     // ۱. بررسی درستِ سخت‌افزار (فقط بررسی بیومتریک قوی مثل اثر انگشت)
     when (biometricManager.canAuthenticate(
@@ -75,7 +75,6 @@ fun biometricHelper(
         .setTitle(title)
         .setSubtitle(subtitle)
         .setAllowedAuthenticators(authenticators)
-        .setNegativeButtonText("cancel")
         .build()
 
     biometricPrompt.authenticate(promptInfo)

@@ -14,7 +14,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,7 +42,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -77,8 +75,6 @@ import com.ahj.noteapplication.core.common.ui.component.CustomAlertDialog
 import com.ahj.noteapplication.core.common.ui.component.CustomAnimateVisibility
 import com.ahj.noteapplication.core.common.ui.component.CustomProgress
 import com.ahj.noteapplication.core.common.ui.component.GlassCard
-import com.ahj.noteapplication.core.common.ui.component.SpacerHeight
-import com.ahj.noteapplication.core.common.utils.openUrl
 import com.ahj.noteapplication.core.common.utils.stripMarkdown
 import com.ahj.noteapplication.feature.note.component.NavigationDrawer
 import com.ahj.noteapplication.feature.note.domain.model.Note
@@ -181,32 +177,6 @@ fun ListNoteScreen(
                     navController.navigate(Screens.CreateScreen(it.state))
                 }
             }
-
-            /* CustomAnimateVisibility(stateMenu, enter = fadeIn(tween(150))) {
-                 MoreMenu(uiState.userEmail, innerPadding) { event ->
-                     when (event) {
-                         is ListNoteUiEvent.ChangePassNavigate -> {
-                             navController.navigate(Screens.ChangePassScreen) {
-                                 popUpTo<Screens.ListNoteScreens> {
-                                     saveState = true
-                                 }
-                             }
-                         }
-
-                         is ListNoteUiEvent.Logout -> {
-                             viewModel.onEvent(event)
-                             navController.navigate(Screens.Authentication) {
-                                 popUpTo<Screens.ListNoteScreens> {
-                                     inclusive = true
-                                 }
-                                 launchSingleTop = true
-                             }
-                         }
-
-                         else -> {
-                             stateMenu = false
-                         }
-     */
         }
     }
 
@@ -352,7 +322,7 @@ fun NoteItem(
 
     Box(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
@@ -371,7 +341,7 @@ fun NoteItem(
                         ),
                         animateScope,
                         boundsTransform = { _, _ -> tween(500) },
-                        placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize
+                        placeholderSize = SharedTransitionScope.PlaceholderSize.ContentSize
                     ),
                 glassClick = glassClick,
                 glassHolder = { state = !state }
@@ -524,94 +494,4 @@ private fun HoldingItem(
 
         }
     }
-}
-
-
-@Composable
-fun MoreMenu(
-    userEmail: String,
-    paddingValues: PaddingValues,
-    onEvent: (ListNoteUiEvent) -> Unit
-) {
-
-    val context = LocalContext.current
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            ) { onEvent(ListNoteUiEvent.OnDismissMenu) },
-        contentAlignment = Alignment.TopStart
-    ) {
-        Box(
-            modifier = Modifier.clickable(enabled = false) {}
-        ) {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
-                elevation = CardDefaults.cardElevation(7.dp),
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(horizontal = 10.dp)
-            ) {
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(10.dp)
-                ) {
-                    Card(
-                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primary)
-                    ) {
-                        Text(
-                            userEmail,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(10.dp),
-                            color = MaterialTheme.colorScheme.secondary,
-                            fontSize = 10.sp
-                        )
-                    }
-                    SpacerHeight(10)
-
-                    TextButton(
-                        {
-                            onEvent(ListNoteUiEvent.ChangePassNavigate)
-                        }) {
-                        Text(
-                            "تغییر رمز عبور",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    SpacerHeight(10)
-
-                    TextButton(
-                        {
-                            context.openUrl(
-                                "https://t.me/AHj80",
-                                "org.telegram.messenger"
-                            )
-                        }) {
-                        Text(
-                            "ارتباط با توسعه دهنده",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    SpacerHeight(10)
-
-                    TextButton(
-                        {
-                            onEvent(ListNoteUiEvent.Logout)
-                        }) {
-                        Text(
-                            "خروج ",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.Red
-                        )
-                    }
-                }
-            }
-        }
-    }
-
 }

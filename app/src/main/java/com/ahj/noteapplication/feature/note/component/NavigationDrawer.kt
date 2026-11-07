@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Card
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
+import com.ahj.noteapplication.BuildConfig
 import com.ahj.noteapplication.core.common.ui.component.SpacerHeight
 import com.ahj.noteapplication.core.common.utils.biometricHelper
 import com.ahj.noteapplication.core.common.utils.openUrl
@@ -56,6 +58,10 @@ fun NavigationDrawer(
         DrawerItemsModel(
             DrawerItems.CONTACTS,
             "ارتباط با توسعه دهنده"
+        ),
+        DrawerItemsModel(
+            DrawerItems.UPDATE,
+            "بررسی بروزرسانی"
         ),
         DrawerItemsModel(
             DrawerItems.LOGOUT,
@@ -93,7 +99,9 @@ fun NavigationDrawer(
                     Card(
                         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primary),
                         elevation = CardDefaults.cardElevation(7.dp),
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp)
                     ) {
                         Row(
                             modifier = Modifier
@@ -133,7 +141,7 @@ fun NavigationDrawer(
                         Box(
                             modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.CenterEnd
-                        ){
+                        ) {
                             Switch(
                                 biometric,
                                 { checkChange ->
@@ -187,6 +195,13 @@ fun NavigationDrawer(
                                         )
                                     }
 
+                                    DrawerItems.UPDATE -> {
+                                        context.openUrl(
+                                            "https://github.com/AHj80/NoteApplication/releases",
+                                            "com.android.chrome"
+                                        )
+                                    }
+
                                     DrawerItems.LOGOUT -> {
                                         onEvent(ListNoteUiEvent.Logout)
                                     }
@@ -210,6 +225,17 @@ fun NavigationDrawer(
 
 
                     }
+
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        Text(
+                            "v  ${BuildConfig.VERSION_NAME}",
+                            modifier = Modifier.navigationBarsPadding()
+                        )
+                    }
+
                 }
             }
         },
