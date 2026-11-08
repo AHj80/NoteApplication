@@ -39,6 +39,7 @@ Download Apk(coming soon)
 - رابط کاربری واکنش‌گرا (Responsive UI)
 - پیاده‌سازی بر پایه Clean Architecture
 - الگوی معماری MVVM
+- ورود با اثرانگشت
 
 ---
 
@@ -59,6 +60,7 @@ Download Apk(coming soon)
 - StateFlow
 - Navigation Component
 - Work Manager
+- Biometric(fingerprint)
 
 
 ---

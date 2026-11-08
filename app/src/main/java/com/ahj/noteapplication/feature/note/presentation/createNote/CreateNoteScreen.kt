@@ -48,6 +48,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -612,13 +613,19 @@ private fun AIResponse(
     response: String?
 ) {
 
+    val scrollState = rememberScrollState()
+
+    LaunchedEffect(scrollState.maxValue) {
+        scrollState.scrollTo(scrollState.maxValue)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 30.dp, vertical = 20.dp)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
             .border(
-                BorderStroke(2.dp, Color.White.copy(alpha = 0.5f)),
+                BorderStroke(3.dp, Color.White.copy(alpha = 0.5f)),
                 shape = RoundedCornerShape(topStart = 15.dp)
             ),
         verticalArrangement = Arrangement.Center,
